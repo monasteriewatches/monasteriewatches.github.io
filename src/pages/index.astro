@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TopBar from '../components/TopBar.astro';
 import Logo from '../components/Logo.astro';
+import TireIcon from '../components/TireIcon.astro';
 import { getWebBranches } from '../data/catalog';
 import { organization, website } from '../data/site';
 
@@ -157,7 +158,7 @@ const center = {
                 aria-describedby={`node-${n.i}-blurb`}
               >
                 <span class="node-disc">
-                  <Logo variant={n.icon} decorative height="100%" />
+                  {n.icon === 'tire' ? <TireIcon decorative height="100%" /> : <Logo variant={n.icon} decorative height="100%" />}
                 </span>
                 <span class="node-label">
                   <span class="node-title" id={`node-${n.i}-title`}>{n.title}</span>
@@ -185,7 +186,7 @@ const center = {
                 aria-describedby={`phone-${n.i}-blurb`}
               >
                 <span class="phone-disc">
-                  <Logo variant={n.icon} decorative height="100%" />
+                  {n.icon === 'tire' ? <TireIcon decorative height="100%" /> : <Logo variant={n.icon} decorative height="100%" />}
                 </span>
                 <span>
                   <span class="phone-title" id={`phone-${n.i}-title`}>{n.title}</span>

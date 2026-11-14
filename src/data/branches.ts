@@ -18,7 +18,8 @@ export interface Branch {
   href: string;
   /** One short line under the node and in the phone list. */
   blurb: string;
-  icon: LogoVariant;
+  /** A logo variant, or 'tire' for the Trackside Series tyre. */
+  icon: LogoVariant | 'tire';
   /** Lower numbers come first. Categories default to 100. */
   order?: number;
   angle?: number;
@@ -31,6 +32,13 @@ export const branches: Branch[] = [
     blurb: 'The bell tower, the monks, our marks and our founder.',
     icon: 'icon',
     order: 10,
+  },
+  {
+    title: 'Trackside Series',
+    href: 'trackside/',
+    blurb: 'Lights Out: thirty circuits on one watch disc.',
+    icon: 'tire',
+    order: 20,
   },
   // new branches are added above this line
 ];

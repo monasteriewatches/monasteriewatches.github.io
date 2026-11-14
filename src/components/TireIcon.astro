@@ -1,0 +1,70 @@
+---
+/**
+ * Trackside Series icon: an original cartoon racing slick seen at a 3/4 tilt,
+ * with "TRACKSIDE SERIES" set in the Monasterie wordmark face around the
+ * sidewall. Not based on any tyre maker's marks or lettering.
+ * Takes the same sizing props as <Logo> so it drops into the same slots.
+ */
+interface Props {
+  width?: string;
+  height?: string;
+  decorative?: boolean;
+  class?: string;
+}
+const { width, height, decorative = false, class: className } = Astro.props;
+const style = [width && `width:${width}`, height && `height:${height}`].filter(Boolean).join(';');
+const id = `tire-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<svg
+  class:list={['logo', 'logo-tire', className]}
+  viewBox="0 0 120 120"
+  style={style || undefined}
+  role={decorative ? undefined : 'img'}
+  aria-hidden={decorative ? 'true' : undefined}
+  aria-label={decorative ? undefined : 'Trackside Series racing tyre'}
+  focusable="false"
+>
+  <defs>
+    <!-- top arc reads left to right, bottom arc too (drawn the other way) -->
+    <path id={`${id}-top`} d="M 24 60 A 36 36 0 0 1 96 60" />
+    <path id={`${id}-bot`} d="M 21 60 A 39 39 0 0 0 99 60" />
+    <radialGradient id={`${id}-rim`} cx="0.4" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#6a5f60" />
+      <stop offset="1" stop-color="#2a2223" />
+    </radialGradient>
+  </defs>
+
+  <g transform="translate(60 60) rotate(-16) scale(0.88 1) translate(-60 -60)">
+    <!-- tread depth: the back of the tyre peeking out to one side -->
+    <circle cx="68" cy="61" r="54" fill="#0b0707" />
+    <rect x="60" y="7" width="8" height="108" fill="#0b0707" />
+    <!-- front face -->
+    <circle cx="60" cy="60" r="54" fill="#1c1314" />
+    <circle cx="60" cy="60" r="51" fill="none" stroke="#2c2223" stroke-width="2" />
+    <!-- coloured sidewall stripe -->
+    <circle cx="60" cy="60" r="46" fill="none" stroke="#f8de8d" stroke-width="4.5" />
+    <!-- lettering -->
+    <g
+      fill="#f4efe7"
+      style="font-family: var(--font-wordmark); letter-spacing: 0.08em;"
+      font-size="9.5"
+      text-anchor="middle"
+    >
+      <text><textPath href={`#${id}-top`} startOffset="50%">TRACKSIDE</textPath></text>
+      <text dominant-baseline="hanging"><textPath href={`#${id}-bot`} startOffset="50%">SERIES</textPath></text>
+    </g>
+    <!-- rim and hub -->
+    <circle cx="60" cy="60" r="25" fill={`url(#${id}-rim)`} />
+    <circle cx="60" cy="60" r="25" fill="none" stroke="#9bb7d4" stroke-width="1.5" />
+    <g stroke="#1c1314" stroke-width="3" stroke-linecap="round">
+      <line x1="60" y1="40" x2="60" y2="80" />
+      <line x1="42.7" y1="50" x2="77.3" y2="70" />
+      <line x1="42.7" y1="70" x2="77.3" y2="50" />
+    </g>
+    <circle cx="60" cy="60" r="7" fill="#3c2d2e" stroke="#f8de8d" stroke-width="1.5" />
+    <!-- shine -->
+    <path d="M 22 44 A 40 40 0 0 1 44 18" fill="none" stroke="#fff" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round" />
+    <path d="M 18 58 A 42 42 0 0 1 19.5 50" fill="none" stroke="#fff" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round" />
+  </g>
+</svg>

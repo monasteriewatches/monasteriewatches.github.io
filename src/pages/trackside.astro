@@ -1,0 +1,572 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TopBar from '../components/TopBar.astro';
+import tracks from '../data/tracks.json';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const sorted = [...tracks].sort((a, b) => a.position - b.position);
+---
+
+<BaseLayout
+  title="Trackside Series: the Lights Out circuits | Monasterie"
+  description="Spin the globe and explore the thirty circuits on the Lights Out track disc, from Sakhir to Hockenheim, with lap length, laps and history for each."
+>
+  <TopBar />
+  <main id="main" class="ts">
+    <h1 class="visually-hidden">Trackside Series: the 30 circuits on the Lights Out disc</h1>
+
+    <div class="ts-stage" id="ts-stage" data-base={base}>
+      <div class="ts-globe" id="ts-globe" aria-label="Globe of the Lights Out circuits" role="application"></div>
+      <p class="ts-hint" id="ts-hint">Drag to spin, scroll to zoom, pick a dot for its circuit.</p>
+    </div>
+
+    <!-- Shown instead of the globe when WebGL is not available -->
+    <section class="ts-list" id="ts-list" hidden aria-labelledby="ts-list-title">
+      <h2 id="ts-list-title">The 30 circuits on the Lights Out disc</h2>
+      <ol role="list">
+        {sorted.map((t) => (
+          <li>
+            <button type="button" class="ts-list-item" data-code={t.code}>
+              <span class="ts-pos">{t.position}</span>
+              <span class="ts-code">{t.code}</span>
+              <span>{t.name}, {t.country} {t.flag}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <aside class="ts-panel" id="ts-panel" aria-labelledby="ts-name" hidden>
+      <button type="button" class="ts-close" id="ts-close" aria-label="Close circuit details">×</button>
+      <p class="ts-eyebrow"><span id="ts-code"></span><span id="ts-tag"></span></p>
+      <h2 id="ts-name"></h2>
+      <p class="ts-country" id="ts-country"></p>
+      <!-- Track outline slot: set "outline" in src/data/tracks.json to a file in public/ (e.g. "tracks/SAK.svg") -->
+      <div class="ts-outline" id="ts-outline" aria-hidden="true"></div>
+      <dl class="ts-stats">
+        <div><dt>Lap</dt><dd id="ts-len"></dd></div>
+        <div><dt>Laps</dt><dd id="ts-laps"></dd></div>
+        <div><dt>Distance</dt><dd id="ts-dist"></dd></div>
+        <div><dt>Race time</dt><dd id="ts-dur"></dd></div>
+      </dl>
+      <p class="ts-history" id="ts-history"></p>
+      <h3>Two things to know</h3>
+      <ul class="ts-facts" id="ts-facts" role="list"></ul>
+      <p class="ts-disc" id="ts-disc"></p>
+    </aside>
+
+    <footer class="ts-foot">Lights Out — Trackside Series by Monasterie. Not affiliated with Formula 1.</footer>
+  </main>
+</BaseLayout>
+
+<script>
+  import tracks from '../data/tracks.json';
+
+  type Track = (typeof tracks)[number];
+  const $ = (id: string) => document.getElementById(id)!;
+  const stage = $('ts-stage');
+  const base = stage.dataset.base ?? '';
+  const panel = $('ts-panel');
+  const byCode = new Map(tracks.map((t) => [t.code, t]));
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const km = (n: number) => `${n.toLocaleString('en-US', { maximumFractionDigits: 3 })} km`;
+
+  let globe: any = null;
+  let resumeTimer = 0;
+  let active: HTMLElement | null = null;
+  let lastFocus: HTMLElement | null = null;
+
+  function setAuto(on: boolean) {
+    if (!globe) return;
+    globe.controls().autoRotate = on && !reduced && panel.hidden;
+  }
+
+  function open(t: Track, from?: HTMLElement) {
+    lastFocus = from ?? (document.activeElement as HTMLElement);
+    $('ts-code').textContent = t.code;
+    $('ts-tag').textContent = t.calendar === 'legend' ? 'Legend' : `${t.calendar} calendar`;
+    $('ts-name').textContent = t.name;
+    $('ts-country').textContent = `${t.circuit} · ${t.country} ${t.flag}`;
+    $('ts-len').textContent = km(t.lengthKm);
+    $('ts-laps').textContent = String(t.laps);
+    $('ts-dist').textContent = km(t.distanceKm);
+    $('ts-dur').textContent = t.duration;
+    $('ts-history').textContent = t.history;
+    $('ts-facts').replaceChildren(
+      ...t.facts.map((f) => Object.assign(document.createElement('li'), { textContent: f }))
+    );
+    $('ts-disc').textContent = `Position #${t.position} on the Lights Out track disc.`;
+    const slot = $('ts-outline');
+    slot.replaceChildren();
+    slot.classList.toggle('is-empty', !t.outline);
+    if (t.outline) {
+      slot.append(Object.assign(new Image(), { src: `${base}/${t.outline}`, alt: '' }));
+    }
+    panel.hidden = false;
+    document.body.classList.add('ts-open');
+
+    if (globe) {
+      active?.classList.remove('is-active');
+      active = document.querySelector(`.ts-dot[data-code="${t.code}"]`);
+      active?.classList.add('is-active');
+      globe.ringsData([t]);
+      globe.pointOfView({ lat: t.lat, lng: t.lng, altitude: 1.5 }, reduced ? 0 : 1400);
+      setAuto(false);
+    }
+    $('ts-close').focus({ preventScroll: true });
+  }
+
+  function close() {
+    panel.hidden = true;
+    document.body.classList.remove('ts-open');
+    active?.classList.remove('is-active');
+    active = null;
+    globe?.ringsData([]);
+    setAuto(true);
+    lastFocus?.focus({ preventScroll: true });
+  }
+
+  $('ts-close').addEventListener('click', close);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !panel.hidden) close();
+  });
+
+  function fallback() {
+    stage.hidden = true;
+    $('ts-list').hidden = false;
+    document.querySelectorAll<HTMLButtonElement>('.ts-list-item').forEach((b) =>
+      b.addEventListener('click', () => open(byCode.get(b.dataset.code!)!, b))
+    );
+  }
+
+  function hasWebGL() {
+    try {
+      const c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    } catch {
+      return false;
+    }
+  }
+
+  async function start() {
+    if (!hasWebGL()) return fallback();
+    let Globe;
+    try {
+      Globe = (await import('globe.gl')).default;
+    } catch {
+      return fallback();
+    }
+    const el = $('ts-globe');
+    const size = () => [el.clientWidth, el.clientHeight];
+
+    try {
+      globe = new Globe(el, { animateIn: !reduced })
+        .width(size()[0])
+        .height(size()[1])
+        .backgroundColor('rgba(0,0,0,0)')
+        .globeImageUrl(`${base}/earth-night.jpg`)
+        .showAtmosphere(true)
+        .atmosphereColor('#9bb7d4')
+        .atmosphereAltitude(0.2)
+        .htmlElementsData(tracks)
+        .htmlLat('lat')
+        .htmlLng('lng')
+        .htmlAltitude(0.005)
+        .htmlElement((d: Track) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'ts-dot';
+          b.dataset.code = d.code;
+          b.setAttribute('aria-label', `${d.name}, ${d.country}`);
+          b.innerHTML = `<span class="ts-dot-core"></span><span class="ts-dot-label">${d.name}</span>`;
+          b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            open(d, b);
+          });
+          return b;
+        })
+        .ringsData([])
+        .ringColor(() => (t: number) => `rgba(248,222,141,${1 - t})`)
+        .ringMaxRadius(4)
+        .ringPropagationSpeed(3)
+        .ringRepeatPeriod(900);
+    } catch {
+      el.replaceChildren();
+      return fallback();
+    }
+
+    // Hide dots on the far side of the globe
+    globe.htmlElementVisibilityModifier?.((node: HTMLElement, visible: boolean) => {
+      node.classList.toggle('is-hidden', !visible);
+    });
+
+    const controls = globe.controls();
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.rotateSpeed = 0.6;
+    controls.zoomSpeed = 0.8;
+    controls.minDistance = 140;
+    controls.maxDistance = 600;
+    controls.autoRotateSpeed = 0.35;
+    setAuto(true);
+    controls.addEventListener('start', () => {
+      clearTimeout(resumeTimer);
+      controls.autoRotate = false;
+    });
+    controls.addEventListener('end', () => {
+      clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(() => setAuto(true), 4000);
+    });
+
+    globe.pointOfView({ lat: 30, lng: 15, altitude: 2.4 });
+    new ResizeObserver(() => {
+      const [w, h] = size();
+      globe.width(w).height(h);
+    }).observe(el);
+  }
+
+  start();
+</script>
+
+<style>
+  .ts {
+    position: relative;
+    height: calc(100svh - var(--bar-h));
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 45%, #4a3839 0%, var(--color-plum) 45%, #22191a 100%);
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .ts-stage,
+  .ts-globe {
+    position: absolute;
+    inset: 0;
+  }
+  .ts-stage {
+    z-index: 0; /* keep the dots under the panel */
+  }
+  .ts-globe {
+    cursor: grab;
+  }
+  .ts-globe:active {
+    cursor: grabbing;
+  }
+  .ts-hint {
+    position: absolute;
+    left: 50%;
+    top: var(--space-5);
+    translate: -50% 0;
+    margin: 0;
+    font-size: var(--text-small);
+    color: var(--text-muted);
+    pointer-events: none;
+    text-align: center;
+    width: max-content;
+    max-width: calc(100% - 2 * var(--grid-margin));
+  }
+
+  /* ---- Dots (built in the script, so styled globally) ---------------------- */
+  :global(.ts-dot) {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    margin: -14px 0 0 -14px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: opacity var(--dur-base) ease;
+  }
+  :global(.ts-dot.is-hidden) {
+    opacity: 0;
+    pointer-events: none;
+  }
+  :global(.ts-dot-core) {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-popcorn);
+    box-shadow: 0 0 6px 2px rgba(248, 222, 141, 0.75), 0 0 16px 4px rgba(248, 222, 141, 0.35);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+  :global(.ts-dot:hover .ts-dot-core),
+  :global(.ts-dot:focus-visible .ts-dot-core) {
+    transform: scale(1.4);
+  }
+  :global(.ts-dot.is-active .ts-dot-core) {
+    animation: ts-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes ts-pulse {
+    50% {
+      transform: scale(1.8);
+      box-shadow: 0 0 10px 4px rgba(248, 222, 141, 0.9), 0 0 28px 8px rgba(248, 222, 141, 0.45);
+    }
+  }
+  :global(.ts-dot:focus-visible) {
+    outline: var(--focus-width) solid var(--color-parchment);
+    outline-offset: 0;
+    border-radius: 50%;
+  }
+  :global(.ts-dot-label) {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 2px);
+    translate: -50% 0;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius);
+    background: var(--color-ink);
+    color: var(--color-parchment);
+    font-family: var(--font-heading);
+    font-weight: var(--weight-heading);
+    font-size: var(--text-small);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-fast) ease;
+  }
+  :global(.ts-dot:hover .ts-dot-label),
+  :global(.ts-dot:focus-visible .ts-dot-label),
+  :global(.ts-dot.is-active .ts-dot-label) {
+    opacity: 1;
+  }
+
+  /* ---- Side panel / bottom sheet ------------------------------------------ */
+  .ts-panel {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    bottom: var(--space-4);
+    width: min(26rem, calc(100% - 2 * var(--space-4)));
+    overflow-y: auto;
+    padding: var(--space-6) var(--space-5) var(--space-5);
+    background: color-mix(in srgb, var(--color-ink) 92%, transparent);
+    border: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 35%, transparent);
+    border-radius: var(--radius);
+    backdrop-filter: blur(6px);
+    animation: ts-in 320ms var(--ease-out) both;
+    z-index: 2;
+  }
+  .ts-panel[hidden] {
+    display: none;
+  }
+  @keyframes ts-in {
+    from {
+      opacity: 0;
+      translate: 1.5rem 0;
+    }
+  }
+  .ts-close {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    width: var(--tap-min);
+    height: var(--tap-min);
+    border: 0;
+    border-radius: var(--radius);
+    background: none;
+    color: var(--text);
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .ts-close:hover {
+    background: color-mix(in srgb, var(--color-parchment) 10%, transparent);
+  }
+  .ts-close:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+  }
+  .ts-eyebrow {
+    display: flex;
+    gap: var(--space-3);
+    align-items: baseline;
+    margin: 0 0 var(--space-2);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  #ts-code {
+    font-family: var(--font-wordmark);
+    font-size: 1.125rem;
+    letter-spacing: var(--tracking-wordmark);
+    color: var(--color-popcorn);
+  }
+  .ts-panel h2 {
+    font-size: var(--text-h2);
+    margin: 0;
+  }
+  .ts-country {
+    margin: var(--space-1) 0 var(--space-4);
+    color: var(--text-muted);
+    font-size: var(--text-small);
+  }
+  .ts-outline {
+    aspect-ratio: 16 / 9;
+    margin-bottom: var(--space-4);
+    border-radius: var(--radius);
+    display: grid;
+    place-items: center;
+  }
+  .ts-outline.is-empty {
+    border: var(--border-width) dashed color-mix(in srgb, var(--color-cerulean) 30%, transparent);
+  }
+  .ts-outline :global(img) {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  .ts-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    margin: 0 0 var(--space-5);
+  }
+  .ts-stats div {
+    padding: var(--space-3);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--color-plum) 70%, transparent);
+  }
+  .ts-stats dt {
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .ts-stats dd {
+    margin: var(--space-1) 0 0;
+    font-family: var(--font-heading);
+    font-weight: var(--weight-heading);
+    font-size: var(--text-h4);
+  }
+  .ts-history {
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+  }
+  .ts-panel h3 {
+    font-size: var(--text-h4);
+    margin: var(--space-5) 0 var(--space-2);
+  }
+  .ts-facts {
+    margin: 0;
+    padding-left: 1.1em;
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+  }
+  .ts-facts :global(li + li) {
+    margin-top: var(--space-2);
+  }
+  .ts-disc {
+    margin: var(--space-5) 0 0;
+    padding-top: var(--space-4);
+    border-top: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 35%, transparent);
+    font-family: var(--font-heading);
+    font-style: italic;
+    font-size: var(--text-h4);
+  }
+
+  /* ---- Fallback list ------------------------------------------------------- */
+  .ts-list {
+    height: 100%;
+    overflow-y: auto;
+    padding: var(--space-7) var(--grid-margin) var(--space-9);
+    max-width: var(--grid-max);
+    margin: 0 auto;
+  }
+  .ts-list h2 {
+    font-size: var(--text-h3);
+  }
+  .ts-list ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    columns: 2 22rem;
+    column-gap: var(--grid-gutter);
+  }
+  .ts-list-item {
+    display: flex;
+    gap: var(--space-3);
+    align-items: baseline;
+    width: 100%;
+    min-height: var(--tap-min);
+    padding: var(--space-2);
+    border: 0;
+    border-radius: var(--radius);
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: var(--text-small);
+    text-align: left;
+    cursor: pointer;
+  }
+  .ts-list-item:hover {
+    background: color-mix(in srgb, var(--color-parchment) 8%, transparent);
+  }
+  .ts-pos {
+    width: 1.5rem;
+    color: var(--text-muted);
+  }
+  .ts-code {
+    font-family: var(--font-wordmark);
+    letter-spacing: var(--tracking-wordmark);
+    color: var(--color-popcorn);
+  }
+
+  .ts-foot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: var(--space-3);
+    text-align: center;
+    font-size: var(--text-label);
+    color: var(--text-muted);
+    pointer-events: none;
+    padding-inline: var(--grid-margin);
+  }
+
+  /* ---- Phones: bottom sheet --------------------------------------------- */
+  @media (max-width: 767px) {
+    .ts-panel {
+      top: auto;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: auto;
+      max-height: 62svh;
+      border-radius: var(--radius) var(--radius) 0 0;
+      border-bottom: 0;
+      animation-name: ts-up;
+    }
+    @keyframes ts-up {
+      from {
+        opacity: 0;
+        translate: 0 2rem;
+      }
+    }
+    /* the globe shrinks into the space above the sheet */
+    :global(body.ts-open) .ts-stage {
+      bottom: 62svh;
+    }
+    :global(body.ts-open) .ts-foot,
+    :global(body.ts-open) .ts-hint {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ts-panel {
+      animation: none;
+    }
+    :global(.ts-dot.is-active .ts-dot-core) {
+      animation: none;
+      transform: scale(1.6);
+    }
+  }
+</style>
