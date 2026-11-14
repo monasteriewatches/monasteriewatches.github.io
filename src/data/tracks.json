@@ -18,7 +18,7 @@
       "In 2020 the outer loop, a lap of just 3.543 km, hosted the one-off Sakhir Grand Prix."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/SAK.svg"
   },
   {
     "position": 2,
@@ -39,7 +39,7 @@
       "Its 27 corners are the most of any current layout."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/JED.svg"
   },
   {
     "position": 3,
@@ -60,7 +60,7 @@
       "For the rest of the year you can drive most of the lap at the city speed limit."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/MEL.svg"
   },
   {
     "position": 4,
@@ -81,7 +81,7 @@
       "130R is one of the fastest corners in racing, taken almost flat out."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/SUZ.svg"
   },
   {
     "position": 5,
@@ -102,7 +102,7 @@
       "The back straight is about 1.2 km long, one of the longest of the year."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/SHA.svg"
   },
   {
     "position": 6,
@@ -123,7 +123,7 @@
       "The lap has 19 corners and three long straights."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/MIA.svg"
   },
   {
     "position": 7,
@@ -144,7 +144,7 @@
       "The 2011 race lasted over four hours with its rain delay, the longest in the sport's history."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/MTL.svg"
   },
   {
     "position": 8,
@@ -165,7 +165,7 @@
       "The Fairmont hairpin is the slowest corner in Formula 1, taken at about 50 km/h."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/MCO.svg"
   },
   {
     "position": 9,
@@ -186,7 +186,7 @@
       "Lewis Hamilton took his record 92nd win here in 2020."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/POR.svg"
   },
   {
     "position": 10,
@@ -207,7 +207,7 @@
       "Most Formula 1 teams have their factories within an hour's drive."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/SIL.svg"
   },
   {
     "position": 11,
@@ -228,7 +228,7 @@
       "The lap climbs about 65 m from the start to the top of the hill."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/SPI.svg"
   },
   {
     "position": 12,
@@ -249,7 +249,7 @@
       "It can rain on one part of the track while another stays dry."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/SPA.svg"
   },
   {
     "position": 13,
@@ -270,7 +270,7 @@
       "It has hosted a Grand Prix every year since 1986."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/HUN.svg"
   },
   {
     "position": 14,
@@ -291,7 +291,7 @@
       "The old banked oval still stands, crumbling, in the trees beside the track."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/MZA.svg"
   },
   {
     "position": 15,
@@ -304,7 +304,7 @@
     "lng": -3.6164,
     "lengthKm": 5.474,
     "laps": 57,
-    "distanceKm": 312.0,
+    "distanceKm": 312,
     "duration": "≈1 h 35 min",
     "history": "Madring is a new semi-street circuit around the IFEMA exhibition centre, first raced in 2026. It brought the Spanish Grand Prix to the capital.",
     "facts": [
@@ -312,7 +312,7 @@
       "The lap mixes public roads with sections built just for racing."
     ],
     "calendar": "2027",
-    "outline": null,
+    "outline": "tracks/MAD.svg",
     "verify": true
   },
   {
@@ -334,7 +334,7 @@
       "A run of about 2.2 km flat out makes it one of the fastest tracks of the year."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/BAK.svg"
   },
   {
     "position": 17,
@@ -355,7 +355,7 @@
       "Lewis Hamilton sealed his seventh world title here in 2020."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/IST.svg"
   },
   {
     "position": 18,
@@ -376,7 +376,7 @@
       "The race often runs close to the two-hour limit."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/SIN.svg"
   },
   {
     "position": 19,
@@ -397,7 +397,7 @@
       "The opening esses take after Silverstone's Maggotts and Becketts."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/ATX.svg"
   },
   {
     "position": 20,
@@ -418,7 +418,7 @@
       "The final sector runs through a baseball stadium full of fans."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/MEX.svg"
   },
   {
     "position": 21,
@@ -439,7 +439,7 @@
       "Many title deciders have been held here, often in sudden rain."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/INT.svg"
   },
   {
     "position": 22,
@@ -460,7 +460,7 @@
       "Night temperatures in November can fall below 10 °C, making tyres hard to warm."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/LVS.svg"
   },
   {
     "position": 23,
@@ -481,7 +481,7 @@
       "It was the first track in the world floodlit for night motorcycle racing."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/LUS.svg"
   },
   {
     "position": 24,
@@ -502,7 +502,7 @@
       "The pit exit runs through a tunnel under the circuit."
     ],
     "calendar": "2027",
-    "outline": null
+    "outline": "tracks/YAS.svg"
   },
   {
     "position": 25,
@@ -523,7 +523,7 @@
       "Formula 1 left the Nordschleife after Niki Lauda's fiery crash there in 1976."
     ],
     "calendar": "legend",
-    "outline": null
+    "outline": "tracks/NUR.svg"
   },
   {
     "position": 26,
@@ -566,7 +566,7 @@
       "The Tamburello bend, once flat out, became a chicane after 1994."
     ],
     "calendar": "legend",
-    "outline": null
+    "outline": "tracks/IMO.svg"
   },
   {
     "position": 28,
@@ -587,7 +587,7 @@
       "Sand blows onto the track from the dunes, so grip changes all weekend."
     ],
     "calendar": "legend",
-    "outline": null
+    "outline": "tracks/ZAN.svg"
   },
   {
     "position": 29,
@@ -608,7 +608,7 @@
       "Only six cars started the 2005 race after a tyre dispute."
     ],
     "calendar": "legend",
-    "outline": null
+    "outline": "tracks/IND.svg"
   },
   {
     "position": 30,
@@ -629,6 +629,6 @@
       "The Motodrom stadium section seats tens of thousands around the final corners."
     ],
     "calendar": "legend",
-    "outline": null
+    "outline": "tracks/HOC.svg"
   }
 ]

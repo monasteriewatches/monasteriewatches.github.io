@@ -36,7 +36,7 @@ export const branches: Branch[] = [
   {
     title: 'Trackside Series',
     href: 'trackside/',
-    blurb: 'Lights Out: thirty circuits on one watch disc.',
+    blurb: 'Lights out. Our first watch is on the grid.',
     icon: 'tire',
     order: 20,
   },
