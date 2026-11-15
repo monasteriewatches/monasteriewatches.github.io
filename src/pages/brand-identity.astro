@@ -3,33 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import TopBar from '../components/TopBar.astro';
 import Logo from '../components/Logo.astro';
 import Seal from '../components/Seal.astro';
+import WorkbenchIcon from '../components/icons/WorkbenchIcon.astro';
+import BellTowerIcon from '../components/icons/BellTowerIcon.astro';
 import { organization, SITE_URL } from '../data/site';
-
-/* STAND-IN PHOTOS from Unsplash (free under the Unsplash License).
-   REPLACE WITH MY OWN: put your photos in public/images/ and change `src`
-   to e.g. `${base}/images/bell-tower.jpg`, then update `alt` and the
-   credit line in the footer. Unsplash crops them to the frame size here. */
-const unsplash = (id: string, w: number, h: number) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&h=${h}&q=80`;
-
-const photos = {
-  // REPLACE WITH MY OWN: bell tower (stand-in: Bruges, by Loris Boulinguez)
-  tower: {
-    src: unsplash('photo-1759338045442-017c39e79568', 960, 1200),
-    src2x: unsplash('photo-1759338045442-017c39e79568', 1920, 2400),
-    width: 960,
-    height: 1200,
-    alt: 'A tall medieval bell tower against a cloudy sky in Bruges, Belgium.',
-  },
-  // REPLACE WITH MY OWN: workshop or clock mechanism (stand-in: watch gears, by Laura Ockel)
-  workshop: {
-    src: unsplash('photo-1593153041370-5ebf6b82886a', 1200, 900),
-    src2x: unsplash('photo-1593153041370-5ebf6b82886a', 2400, 1800),
-    width: 1200,
-    height: 900,
-    alt: 'Close-up of metal gears, wheels and springs taken from old watches.',
-  },
-};
 
 const workshop = [
   {
@@ -119,17 +95,8 @@ const principles = [
             spread.
           </p>
         </div>
-        <figure class="bi-photo bi-photo-tall">
-          <!-- REPLACE WITH MY OWN: stand-in photo from Unsplash -->
-          <img
-            src={photos.tower.src}
-            srcset={`${photos.tower.src} 1x, ${photos.tower.src2x} 2x`}
-            width={photos.tower.width}
-            height={photos.tower.height}
-            alt={photos.tower.alt}
-            loading="lazy"
-            decoding="async"
-          />
+        <figure class="bi-photo bi-photo-tall bi-icon">
+          <BellTowerIcon />
         </figure>
       </div>
     </section>
@@ -137,17 +104,8 @@ const principles = [
     <!-- 3. The monastery as a workshop -->
     <section class="bi-screen" aria-labelledby="workshop">
       <div class="wrap bi-workshop">
-        <figure class="bi-photo bi-photo-wide">
-          <!-- REPLACE WITH MY OWN: stand-in photo from Unsplash -->
-          <img
-            src={photos.workshop.src}
-            srcset={`${photos.workshop.src} 1x, ${photos.workshop.src2x} 2x`}
-            width={photos.workshop.width}
-            height={photos.workshop.height}
-            alt={photos.workshop.alt}
-            loading="lazy"
-            decoding="async"
-          />
+        <figure class="bi-photo bi-photo-wide bi-icon">
+          <WorkbenchIcon />
         </figure>
         <div class="bi-text">
           <h2 id="workshop">The monastery as a workshop</h2>
@@ -204,7 +162,7 @@ const principles = [
             people can look up to.
           </p>
           <p>
-            The icon is the tower's window with its light on, an eight-point star. The
+            The icon is the tower's window with its light on: the beacon of hope. The
             wordmark is set in Metamorphous, always in capitals. In the second wordmark the A
             becomes the window itself.
           </p>
@@ -254,7 +212,7 @@ const principles = [
               <line x1="94" y1="139" x2="306" y2="351" />
               <line x1="306" y1="139" x2="94" y2="351" />
             </g>
-            <!-- the window and star, drawn as an outline -->
+            <!-- the window and beacon, drawn as an outline -->
             <g class="sketch-mark" transform="translate(200 245) scale(1.12) translate(-128 -157.9)">
               <path d="M70 149L70 103.6C70 70.3 97.4 55.7 116.8 36.1L116.8 61.5C100.7 70.5 84.6 85.1 84.4 105L84.4 109L78.4 115L84.4 123.1L84.4 147.7L70 149ZM171.6 147.7L171.6 123.1L177.6 115L171.6 109L171.6 105C171.4 85.1 155.3 70.5 139.2 61.5L139.2 36.1C158.6 55.7 186 70.3 186 103.6L186 149L171.6 147.7ZM84.4 225.6L119.6 225.6L120.8 240L70 240L70 166.9L84.4 168.1L84.4 192.8L78.4 200.8L84.4 206.9ZM136.4 225.6L171.6 225.6L171.6 206.9L177.6 200.8L171.6 192.8L171.6 168.1L186 166.9L186 240L135.2 240L136.4 225.6Z" />
               <path d="M111 165.6L21.3 157.9L111 150.3L82.2 112.2L120 140.6L128 4L136.1 140.6L173.8 112.2L145 150.3L234.7 157.9L145 165.6L173.8 203.7L135.7 175L128 269.7L120.3 175L82.2 203.7L111 165.6Z" />
@@ -297,12 +255,6 @@ const principles = [
   <footer class="bi-footer">
     <div class="wrap bi-footer-inner">
       <p class="small">Monasterie Watch Company · Conversatio Morum</p>
-      <p class="small muted">
-        Photos from Unsplash: bell tower by{' '}
-        <a href="https://unsplash.com/photos/historic-bell-tower-against-a-cloudy-sky-7xWcn4hzR-4">Loris Boulinguez</a>,
-        watch gears by{' '}
-        <a href="https://unsplash.com/photos/gold-and-silver-studded-accessory-RZSrqJjhkeg">Laura Ockel</a>.
-      </p>
     </div>
   </footer>
 </BaseLayout>
@@ -397,6 +349,18 @@ const principles = [
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  /* drawn icons sit on a parchment panel in the photo slots */
+  .bi-icon {
+    display: grid;
+    place-items: center;
+    padding: clamp(var(--space-6), 8%, var(--space-9));
+    background: var(--color-parchment);
+    border: var(--border-width) solid color-mix(in srgb, var(--color-plum) 18%, transparent);
+  }
+  .bi-icon :global(.brand-icon) {
+    width: 100%;
+    height: 100%;
   }
 
   /* ---- 2. Bell tower: text left, tall photo right --------------------------- */

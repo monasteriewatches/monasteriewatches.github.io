@@ -1,0 +1,44 @@
+---
+/**
+ * Brand icon: a watchmaker's bench, front view. Flat, in the same style as
+ * the Trackside tyre: plum body, popcorn catch skin and handles, cerulean
+ * tools, drawn for a parchment panel. Colours come from tokens only.
+ */
+interface Props {
+  label?: string;
+  class?: string;
+}
+const { label = "Monasterie watchmaker's workbench", class: className } = Astro.props;
+const plum = 'fill: var(--color-plum)';
+const tool = 'fill: none; stroke: var(--color-cerulean); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round';
+const handles = [79, 94, 109];
+---
+
+<svg class:list={['brand-icon', className]} viewBox="0 0 160 128" role="img" aria-label={label} focusable="false">
+  <!-- bench body: raised back, side wings, desktop, drawer stacks -->
+  <rect x="34" y="14" width="92" height="46" rx="3" style={plum} />
+  <rect x="12" y="38" width="20" height="28" rx="3" style={plum} />
+  <rect x="128" y="38" width="20" height="28" rx="3" style={plum} />
+  <rect x="8" y="60" width="144" height="12" rx="3" style={plum} />
+  <rect x="14" y="70" width="40" height="46" rx="3" style={plum} />
+  <rect x="106" y="70" width="40" height="46" rx="3" style={plum} />
+  <g style="stroke: var(--color-parchment); stroke-width: 3">
+    <path d="M14 86.5H54M14 101.5H54M106 86.5H146M106 101.5H146" />
+  </g>
+  <g style="fill: var(--color-popcorn)">
+    {handles.map((y) => <><circle cx="34" cy={y} r="3.5" /><circle cx="126" cy={y} r="3.5" /></>)}
+  </g>
+
+  <!-- catch skin hanging under the desk -->
+  <path
+    d="M56 72 Q80 122 104 72 Z"
+    style="fill: var(--color-popcorn); stroke: var(--color-plum); stroke-width: 4; stroke-linejoin: round"
+  />
+
+  <!-- loupe arm and screwdrivers on the left, movement holder in the center -->
+  <path d="M42 60V30L58 22L64 32" style={tool} />
+  <circle cx="64" cy="39" r="6" style={tool} />
+  <path d="M76 42V60M83 42V60M90 42V60M97 42V60" style={tool} />
+  <circle cx="113" cy="49" r="8" style="fill: var(--color-popcorn); stroke: var(--color-cerulean); stroke-width: 4" />
+  <circle cx="113" cy="49" r="2.5" style={plum} />
+</svg>

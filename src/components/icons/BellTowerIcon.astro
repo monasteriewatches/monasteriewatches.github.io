@@ -1,0 +1,62 @@
+---
+/**
+ * Brand icon: the bell tower above the town rooftops, front view. Flat, in
+ * the same style as the Trackside tyre. The beacon in the upper window is
+ * the beacon part of the Monasterie logo artwork. Colours come from tokens only.
+ */
+import { LOGOS } from '../logo-paths';
+
+interface Props {
+  label?: string;
+  class?: string;
+}
+const { label = 'Monasterie bell tower with the beacon of hope, at the center of town', class: className } = Astro.props;
+
+// the beacon from the logo, framed by its own bounding box
+const beacon = LOGOS.icon.parts.filter((p) => p.star).map((p) => p.d);
+const nums = beacon.join(' ').match(/-?[\d.]+/g)!.map(Number);
+const xs = nums.filter((_, i) => i % 2 === 0);
+const ys = nums.filter((_, i) => i % 2 === 1);
+const bx = Math.min(...xs);
+const by = Math.min(...ys);
+const beaconBox = `${bx} ${by} ${Math.max(...xs) - bx} ${Math.max(...ys) - by}`;
+
+const ink = 'fill: var(--color-ink)';
+// gabled houses: [left, right, wall top, roof peak]
+const houses = [
+  [4, 28, 170, 154],
+  [26, 54, 160, 140],
+  [132, 156, 170, 154],
+  [106, 134, 160, 140],
+];
+---
+
+<svg class:list={['brand-icon', className]} viewBox="0 0 160 200" role="img" aria-label={label} focusable="false">
+  <!-- town rooftops on both sides -->
+  <g style="fill: var(--color-cerulean); stroke: var(--color-parchment); stroke-width: 3; stroke-linejoin: round">
+    {houses.map(([l, r, w, p]) => <path d={`M${l} 198V${w}L${(l + r) / 2} ${p}L${r} ${w}V198Z`} />)}
+  </g>
+
+  <!-- tower: spire, three tiers narrowing upward, corner turrets on the middle tier -->
+  <g style="fill: var(--color-plum); stroke: var(--color-plum); stroke-width: 1; stroke-linejoin: round">
+    <path d="M66 32L80 4L94 32Z" />
+    <rect x="68" y="30" width="24" height="30" />
+    <rect x="62" y="58" width="36" height="78" />
+    <path d="M54 136V74L58 60L62 74V136ZM98 136V74L102 60L106 74V136Z" />
+    <rect x="54" y="134" width="52" height="64" />
+  </g>
+
+  <!-- clock -->
+  <circle cx="80" cy="45" r="9" style="fill: var(--color-popcorn)" />
+  <path d="M80 45V39M80 45L85 47" style="stroke: var(--color-plum); stroke-width: 2.5; stroke-linecap: round" />
+
+  <!-- two arched windows; the beacon shines in the upper one -->
+  <path d="M69 98V74A11 11 0 0 1 91 74V98Z" style={ink} />
+  <svg x="70" y="65" width="20" height="32" viewBox={beaconBox} preserveAspectRatio="xMidYMid meet">
+    {beacon.map((d) => <path d={d} style="fill: var(--color-popcorn)" />)}
+  </svg>
+  <path d="M73 128V111A7 7 0 0 1 87 111V128Z" style={ink} />
+
+  <!-- door -->
+  <path d="M72 198V180A8 8 0 0 1 88 180V198Z" style={ink} />
+</svg>
