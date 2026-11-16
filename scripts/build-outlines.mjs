@@ -34,9 +34,15 @@ function line(geo) {
 
 fs.mkdirSync(OUT, { recursive: true });
 const tracks = JSON.parse(fs.readFileSync(DATA, 'utf8'));
+// hand-drawn outlines that must not be overwritten (IND: the Indy 500 oval)
+const MANUAL = new Set(['IND']);
 const missing = [];
 
 for (const t of tracks) {
+  if (MANUAL.has(t.code)) {
+    t.outline = `tracks/${t.code}.svg`;
+    continue;
+  }
   const id = IDS[t.code];
   const file = id && path.join(SRC, 'circuits', `${id}.geojson`);
   if (!file || !fs.existsSync(file)) {

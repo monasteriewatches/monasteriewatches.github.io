@@ -602,10 +602,11 @@
     "laps": 73,
     "distanceKm": 306.016,
     "duration": "≈1 h 30 min",
-    "history": "Indianapolis opened in 1909, and the Indy 500 counted toward the World Championship from 1950 to 1960. Formula 1 used a road course inside the oval from 2000 to 2007.",
+    "history": "Indianapolis opened in 1909, and the Indy 500 counted toward the World Championship from 1950 to 1960.",
     "facts": [
       "The track was paved with about 3.2 million bricks in 1909, hence the Brickyard.",
-      "Only six cars started the 2005 race after a tyre dispute."
+      "Only six cars started the 2005 race after a tyre dispute.",
+      "Formula 1 used a road course inside the oval from 2000 to 2007."
     ],
     "calendar": "legend",
     "outline": "tracks/IND.svg"

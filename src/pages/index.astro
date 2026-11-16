@@ -2,11 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TopBar from '../components/TopBar.astro';
 import Logo from '../components/Logo.astro';
-import TireIcon from '../components/TireIcon.astro';
 import { getWebBranches } from '../data/catalog';
 import { organization, website } from '../data/site';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const tracksideBanner = `${base}/trackside/trackside-banner.svg`;
 const branches = await getWebBranches();
 
 /* ---- Web geometry ---------------------------------------------------------
@@ -157,8 +157,8 @@ const center = {
                 aria-labelledby={`node-${n.i}-title`}
                 aria-describedby={`node-${n.i}-blurb`}
               >
-                <span class="node-disc">
-                  {n.icon === 'tire' ? <TireIcon decorative height="100%" /> : <Logo variant={n.icon} decorative height="100%" />}
+                <span class:list={['node-disc', { 'is-banner': n.icon === 'tire' }]}>
+                  {n.icon === 'tire' ? <img class="banner" src={tracksideBanner} alt="Trackside Series" width="1074" height="124" /> : <Logo variant={n.icon} decorative height="100%" />}
                 </span>
                 <span class="node-label">
                   <span class="node-title" id={`node-${n.i}-title`}>{n.title}</span>
@@ -185,8 +185,8 @@ const center = {
                 aria-labelledby={`phone-${n.i}-title`}
                 aria-describedby={`phone-${n.i}-blurb`}
               >
-                <span class="phone-disc">
-                  {n.icon === 'tire' ? <TireIcon decorative height="100%" /> : <Logo variant={n.icon} decorative height="100%" />}
+                <span class:list={['phone-disc', { 'is-banner': n.icon === 'tire' }]}>
+                  {n.icon === 'tire' ? <img class="banner" src={tracksideBanner} alt="Trackside Series" width="1074" height="124" /> : <Logo variant={n.icon} decorative height="100%" />}
                 </span>
                 <span>
                   <span class="phone-title" id={`phone-${n.i}-title`}>{n.title}</span>
@@ -328,6 +328,19 @@ const center = {
     margin: auto;
     width: auto;
     height: 100% !important;
+  }
+  /* the wide Trackside banner: wider than the node, centered on it */
+  .node-disc.is-banner {
+    display: grid;
+    place-items: center;
+    left: -45%;
+    width: 190%;
+  }
+  .banner {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
   }
   .node-label {
     position: absolute;
@@ -489,6 +502,9 @@ const center = {
     .phone-disc :global(.logo) {
       width: auto;
       height: 3rem !important;
+    }
+    .phone-disc.is-banner {
+      width: 6.5rem;
     }
     .phone-title {
       display: block;

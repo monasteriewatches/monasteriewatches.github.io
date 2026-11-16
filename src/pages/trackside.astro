@@ -16,8 +16,19 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     <h1 class="visually-hidden">Trackside Series: the 30 circuits on the Lights Out disc</h1>
 
     <section class="ts-intro" aria-labelledby="ts-intro-title">
-      <p class="ts-intro-eyebrow">Trackside Series · Model 01</p>
-      <h2 id="ts-intro-title">Lights Out</h2>
+      <div class="ts-intro-head">
+        <img
+          class="ts-intro-logo"
+          src={`${base}/trackside/lights-out-logo.svg`}
+          alt="Lights Out logo"
+          width="512"
+          height="512"
+        />
+        <div>
+          <p class="ts-intro-eyebrow">Trackside Series · Model 01</p>
+          <h2 id="ts-intro-title">Lights Out</h2>
+        </div>
+      </div>
       <p>Five red lights. Then nothing. Lights Out is the first watch in the Monasterie Trackside Series, built to rethink what a motorsport watch can be.</p>
       <p>Not a logo stamped on a chronograph. A watch for the fans who plan weekends around qualifying, set alarms for races on the far side of the world, and know every corner by name.</p>
       <p>Engineered to outperform watches at twice its price. Priced for the people who actually watch.</p>
@@ -605,6 +616,28 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
     color: var(--text-muted);
+  }
+  .ts-intro-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    align-items: center;
+    margin-bottom: var(--space-5);
+  }
+  .ts-intro-logo {
+    width: 6.5rem;
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: var(--radius);
+  }
+  .ts-intro-head h2 {
+    margin: 0;
+    font-size: clamp(2.25rem, 1.25rem + 2.4vw, 3.5rem);
+  }
+  @media (max-width: 479px) {
+    .ts-intro-head {
+      grid-template-columns: 1fr;
+    }
   }
   .ts-intro h2 {
     font-family: var(--font-heading);
