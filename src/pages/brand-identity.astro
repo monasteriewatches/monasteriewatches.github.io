@@ -286,6 +286,17 @@ const principles = [
   .bi-motto {
     padding-block: var(--space-7);
   }
+  /* Phones: sections take the height of their content. Forcing one or two
+     screens there left half-empty screens under short sections. */
+  @media (max-width: 767px) {
+    .bi-screen {
+      min-height: 0;
+      padding-block: var(--space-8);
+    }
+    .bi-motto {
+      padding-block: var(--space-8);
+    }
+  }
 
   .bi-text h2 {
     margin-bottom: var(--space-5);
@@ -323,11 +334,12 @@ const principles = [
     height: min(52svh, 30rem);
     width: auto;
     margin-bottom: var(--space-3);
+    /* scale only: it stays visible from the first frame, so it never
+       holds back the page's first big paint */
     animation: settle 700ms var(--ease-out) both;
   }
   .bi-hero h1 {
     margin: 0;
-    animation: fade 500ms ease 250ms both;
   }
   .bi-hero-line {
     max-width: 34rem;
@@ -335,7 +347,6 @@ const principles = [
     font-size: var(--text-h4);
     line-height: 1.5;
     color: var(--text-muted);
-    animation: fade 500ms ease 400ms both;
   }
 
   /* ---- Photos ------------------------------------------------------------------ */
@@ -592,14 +603,11 @@ const principles = [
 
   /* ---- Motion -------------------------------------------------------------- */
   @keyframes settle {
-    from { opacity: 0; scale: 0.97; }
-  }
-  @keyframes fade {
-    from { opacity: 0; }
+    from { scale: 0.97; }
   }
   @media (prefers-reduced-motion: reduce) {
     .bi-hero :global(.bi-hero-seal) {
-      animation: fade 200ms ease both;
+      animation: none;
     }
     :global(.js) .bi-motto-title span {
       clip-path: none;
@@ -613,7 +621,12 @@ const principles = [
 
   // Size each section to exactly one or two screens.
   const sections = document.querySelectorAll<HTMLElement>('.bi-screen');
+  const wide = matchMedia('(min-width: 768px)');
   const size = () => {
+    if (!wide.matches) {
+      sections.forEach((s) => s.removeAttribute('data-h'));
+      return;
+    }
     const bar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) * 16 || 56;
     const screen = window.innerHeight - bar;
     sections.forEach((s) => {

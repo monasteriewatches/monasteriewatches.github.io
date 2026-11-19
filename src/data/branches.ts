@@ -16,6 +16,9 @@ export interface Branch {
   title: string;
   /** Path inside the site, without the leading slash, ending in / */
   href: string;
+  /** Optional start of the title to show alone in the phone top bar
+      (e.g. 'Brand' for 'Brand Identity'); screen readers still hear it all. */
+  short?: string;
   /** One short line under the node and in the phone list. */
   blurb: string;
   /** A logo variant, or 'tire' for the Trackside Series tyre. */
@@ -29,6 +32,7 @@ export const branches: Branch[] = [
   {
     title: 'Brand Identity',
     href: 'brand-identity/',
+    short: 'Brand',
     blurb: 'The bell tower, the monks, our marks and our founder.',
     icon: 'icon',
     order: 10,
@@ -36,6 +40,7 @@ export const branches: Branch[] = [
   {
     title: 'Trackside Series',
     href: 'trackside/',
+    short: 'Trackside',
     blurb: 'Lights out. Our first watch is on the grid.',
     icon: 'tire',
     order: 20,

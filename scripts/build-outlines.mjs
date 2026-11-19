@@ -34,8 +34,9 @@ function line(geo) {
 
 fs.mkdirSync(OUT, { recursive: true });
 const tracks = JSON.parse(fs.readFileSync(DATA, 'utf8'));
-// hand-drawn outlines that must not be overwritten (IND: the Indy 500 oval)
-const MANUAL = new Set(['IND']);
+// hand-made outlines that must not be overwritten (IND: the Indy 500 oval;
+// LMS: Circuit de la Sarthe, converted from a supplied SVG, not in the dataset)
+const MANUAL = new Set(['IND', 'LMS']);
 const missing = [];
 
 for (const t of tracks) {
