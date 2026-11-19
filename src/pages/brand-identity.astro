@@ -4,8 +4,9 @@ import TopBar from '../components/TopBar.astro';
 import Logo from '../components/Logo.astro';
 import Seal from '../components/Seal.astro';
 import WorkbenchIcon from '../components/icons/WorkbenchIcon.astro';
-import BellTowerIcon from '../components/icons/BellTowerIcon.astro';
 import { organization, SITE_URL } from '../data/site';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const workshop = [
   {
@@ -95,8 +96,24 @@ const principles = [
             spread.
           </p>
         </div>
-        <figure class="bi-photo bi-photo-tall bi-icon">
-          <BellTowerIcon />
+        <figure class="bi-photo bi-photo-tall">
+          <picture>
+            <source
+              type="image/webp"
+              srcset={`${base}/images/bell-tower-480.webp 480w, ${base}/images/bell-tower-800.webp 800w, ${base}/images/bell-tower-1200.webp 1200w`}
+              sizes="(min-width: 900px) 34rem, 100vw"
+            />
+            <img
+              src={`${base}/images/bell-tower-800.jpg`}
+              srcset={`${base}/images/bell-tower-480.jpg 480w, ${base}/images/bell-tower-800.jpg 800w, ${base}/images/bell-tower-1200.jpg 1200w`}
+              sizes="(min-width: 900px) 34rem, 100vw"
+              alt="A stone clock tower rising above a brick hall and modern glass buildings at dusk."
+              width="1200"
+              height="1500"
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
         </figure>
       </div>
     </section>
@@ -344,6 +361,10 @@ const principles = [
     border-radius: var(--radius);
     overflow: hidden;
     background: color-mix(in srgb, var(--color-plum) 12%, var(--color-parchment));
+  }
+  .bi-photo picture {
+    display: block;
+    height: 100%;
   }
   .bi-photo img {
     width: 100%;
