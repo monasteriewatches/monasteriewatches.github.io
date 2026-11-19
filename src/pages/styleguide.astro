@@ -196,7 +196,17 @@ const spaces = [
               {pairs.map((p) => (
                 <tr data-fg={`--color-${p.fg}`} data-bg={`--color-${p.bg}`} data-allowed={String(p.allowed)}>
                   <td>
-                    <span class="pair-sample" style={`color: var(--color-${p.fg}); background: var(--color-${p.bg});`}>Aa</span>
+                    {/* drawn, not typed: the failing pairs are shown on purpose,
+                        and as text they would fail the page's own contrast check */}
+                    <svg
+                      class="pair-sample"
+                      viewBox="0 0 64 48"
+                      role="img"
+                      aria-label={`Sample: ${p.fg} on ${p.bg}`}
+                      style={`background: var(--color-${p.bg});`}
+                    >
+                      <text x="32" y="33" text-anchor="middle" fill={`var(--color-${p.fg})`}>Aa</text>
+                    </svg>
                   </td>
                   <td class="small">{p.fg} on {p.bg}</td>
                   <td class="small ratio">…</td>
@@ -239,7 +249,7 @@ const spaces = [
           <h3>Headings and body together</h3>
           <p>
             A Cormorant heading sits over Source Serif 4 body copy. Body text keeps to about
-            65 characters a line so it stays easy to read on a wide screen, and
+            65 characters a line so it stays easy to read on a wide screen, and{' '}
             <a href="#type">links are underlined</a> so they read as links without color.
           </p>
         </div>
@@ -263,8 +273,8 @@ const spaces = [
             <p class="label muted">On {g}</p>
             <div class="btn-grid">
               <div class="btn-row">
-                <button class="btn btn-primary" type="button">Order a watch</button>
-                <button class="btn btn-secondary" type="button">See the specs</button>
+                <button class="btn btn-primary" type="button">See the watch</button>
+                <button class="btn btn-secondary" type="button">Meet the founder</button>
                 <button class="btn btn-text" type="button">Read the story</button>
               </div>
               <div class="btn-row">
@@ -529,15 +539,35 @@ const spaces = [
     font-weight: var(--weight-body-strong);
   }
   .pair-sample {
-    display: inline-grid;
-    place-items: center;
+    display: block;
     width: var(--space-8);
     height: var(--space-7);
     border-radius: var(--radius);
     font-family: var(--font-heading);
     font-weight: 600;
-    font-size: var(--text-h3);
+    font-size: 28px;
     border: var(--border-width) solid color-mix(in srgb, var(--text) 15%, transparent);
+  }
+  /* Phones: the spec tables fit the screen instead of hiding a column
+     off to the side */
+  @media (max-width: 639px) {
+    .spec {
+      min-width: 0;
+    }
+    .spec td,
+    .spec th {
+      padding-right: var(--space-2);
+    }
+    .spec code {
+      overflow-wrap: anywhere;
+    }
+    .spec .dl a {
+      display: block;
+      padding-block: var(--space-1);
+    }
+    .spec .dl a + a {
+      margin-left: 0;
+    }
   }
   .ratio {
     font-variant-numeric: tabular-nums;

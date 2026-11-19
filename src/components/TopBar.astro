@@ -21,10 +21,12 @@ const branches = await getWebBranches();
       <ul class="topbar-links" role="list">
         {branches.map((b) => {
           const href = `${base}/${b.href}`;
+          // On phones only the short form shows; the rest stays for screen readers
+          const rest = b.short && b.title.startsWith(b.short) ? b.title.slice(b.short.length) : null;
           return (
             <li>
               <a class="topbar-link" href={href} aria-current={here === href ? 'page' : here.startsWith(href) ? 'true' : undefined}>
-                {b.title}
+                {rest ? <>{b.short}<span class="topbar-rest">{rest}</span></> : b.title}
               </a>
             </li>
           );
@@ -79,9 +81,35 @@ const branches = await getWebBranches();
     text-decoration-color: transparent;
     transition: text-decoration-color var(--dur-base) var(--ease);
   }
-  .topbar-link:hover,
   .topbar-link:focus-visible,
   .topbar-link[aria-current] {
     text-decoration-color: currentColor;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .topbar-link:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+  .topbar-rest {
+    white-space: pre;
+  }
+  /* Phones: the logo and both full names don't fit in 390px, so the links
+     show their short form. The rest is clipped, not removed, so screen
+     readers still hear "Brand Identity". */
+  @media (max-width: 479px) {
+    .topbar-inner {
+      gap: var(--space-4);
+    }
+    .topbar-links {
+      gap: var(--space-4);
+    }
+    .topbar-rest {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
   }
 </style>

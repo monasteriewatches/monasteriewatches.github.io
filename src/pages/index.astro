@@ -154,15 +154,13 @@ const center = {
                 class="node-link"
                 href={n.href}
                 data-branch={n.i}
-                aria-labelledby={`node-${n.i}-title`}
-                aria-describedby={`node-${n.i}-blurb`}
               >
                 <span class:list={['node-disc', { 'is-banner': n.icon === 'tire' }]}>
-                  {n.icon === 'tire' ? <img class="banner" src={tracksideBanner} alt="Trackside Series" width="1074" height="124" /> : <Logo variant={n.icon} decorative height="100%" />}
+                  {n.icon === 'tire' ? <img class="banner" src={tracksideBanner} alt="" width="1074" height="124" /> : <Logo variant={n.icon} decorative height="100%" />}
                 </span>
                 <span class="node-label">
-                  <span class="node-title" id={`node-${n.i}-title`}>{n.title}</span>
-                  <span class="node-blurb" id={`node-${n.i}-blurb`}>{n.blurb}</span>
+                  <span class="node-title">{n.title}</span>
+                  <span class="node-blurb">{n.blurb}</span>
                 </span>
               </a>
             </li>
@@ -179,18 +177,13 @@ const center = {
         <ul class="phone-list" role="list">
           {placed.map((n) => (
             <li>
-              <a
-                class="phone-item"
-                href={n.href}
-                aria-labelledby={`phone-${n.i}-title`}
-                aria-describedby={`phone-${n.i}-blurb`}
-              >
+              <a class="phone-item" href={n.href}>
                 <span class:list={['phone-disc', { 'is-banner': n.icon === 'tire' }]}>
-                  {n.icon === 'tire' ? <img class="banner" src={tracksideBanner} alt="Trackside Series" width="1074" height="124" /> : <Logo variant={n.icon} decorative height="100%" />}
+                  {n.icon === 'tire' ? <img class="banner" src={tracksideBanner} alt="" width="1074" height="124" /> : <Logo variant={n.icon} decorative height="100%" />}
                 </span>
                 <span>
-                  <span class="phone-title" id={`phone-${n.i}-title`}>{n.title}</span>
-                  <span class="phone-blurb" id={`phone-${n.i}-blurb`}>{n.blurb}</span>
+                  <span class="phone-title">{n.title}</span>
+                  <span class="phone-blurb">{n.blurb}</span>
                 </span>
               </a>
             </li>
@@ -449,13 +442,15 @@ const center = {
   }
 
   @media (max-width: 767px) {
+    /* the wordmark, line and list sit together in the middle of the
+       screen instead of leaving its lower half empty */
     .web {
-      justify-content: flex-start;
+      justify-content: center;
       align-items: stretch;
       gap: 0;
       height: auto;
       min-height: calc(100svh - var(--bar-h));
-      padding-top: var(--space-6);
+      padding-block: var(--space-6) var(--space-7);
     }
     .web-stage {
       display: none;
@@ -489,22 +484,26 @@ const center = {
       padding-block: var(--space-3);
       text-decoration: none;
     }
+    .phone-item {
+      transition: background-color var(--dur-fast) ease;
+    }
     .phone-item:active {
       background: color-mix(in srgb, var(--color-plum) 6%, transparent);
     }
+    .phone-item:focus-visible {
+      outline-offset: 0;
+    }
+    /* one fixed column for every icon, so the titles line up */
     .phone-disc {
       flex: none;
       display: grid;
       place-items: center;
-      width: 3rem;
+      width: 6.5rem;
       height: 3rem;
     }
     .phone-disc :global(.logo) {
       width: auto;
       height: 3rem !important;
-    }
-    .phone-disc.is-banner {
-      width: 6.5rem;
     }
     .phone-title {
       display: block;

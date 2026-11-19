@@ -1,5 +1,10 @@
 ---
 import '../styles/global.css';
+// The three Latin fonts every page uses above the fold. Preloading them
+// starts the downloads with the HTML instead of after the CSS arrives.
+import fontBody from '@fontsource-variable/source-serif-4/files/source-serif-4-latin-opsz-normal.woff2?url';
+import fontHeading from '@fontsource-variable/cormorant-garamond/files/cormorant-garamond-latin-wght-normal.woff2?url';
+import fontWordmark from '@fontsource/metamorphous/files/metamorphous-latin-400-normal.woff2?url';
 
 interface Props {
   /** Shown in the browser tab, Google results and share previews (aim for 50-60 characters). */
@@ -43,6 +48,9 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <link rel="preload" href={fontBody} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fontHeading} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={fontWordmark} as="font" type="font/woff2" crossorigin />
     <meta name="description" content={description} />
     {noindex ? <meta name="robots" content="noindex, nofollow" /> : <link rel="canonical" href={pageUrl} />}
     <meta name="theme-color" content={ground === 'plum' ? '#3c2d2e' : '#f4efe7'} />

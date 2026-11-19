@@ -15,7 +15,9 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   <main id="main" class="ts">
     <h1 class="visually-hidden">Trackside Series: the 30 circuits on the Lights Out disc</h1>
 
-    <section class="ts-intro" aria-labelledby="ts-intro-title">
+    <!-- On tablets and phones this wrapper steps aside (display: contents) so
+         the title and controls sit above the globe and the story below it. -->
+    <div class="ts-intro">
       <div class="ts-intro-head">
         <img
           class="ts-intro-logo"
@@ -29,19 +31,52 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
           <h2 id="ts-intro-title">Lights Out</h2>
         </div>
       </div>
+      <div class="ts-copy">
       <p>Five red lights. Then nothing. Lights Out is the first watch in the Monasterie Trackside Series, built to rethink what a motorsport watch can be.</p>
       <p>Not a logo stamped on a chronograph. A watch for the fans who plan weekends around qualifying, set alarms for races on the far side of the world, and know every corner by name.</p>
       <p>Engineered to outperform watches at twice its price. Priced for the people who actually watch.</p>
+      </div>
+      <div class="ts-cta">
       <p class="ts-intro-prompt">Spin the globe. Find your circuit.</p>
+      <p class="ts-hint" id="ts-keys">
+        Drag to turn it, or Tab to it and use the arrow keys. Enter opens a circuit.
+      </p>
+      <div class="ts-controls">
+        <button type="button" class="btn btn-secondary btn-sm" id="ts-view" aria-controls="ts-list" aria-expanded="false">
+          See all 30 as a list
+        </button>
+        <button type="button" class="btn btn-text btn-sm" id="ts-spin" hidden>Pause rotation</button>
+      </div>
       <p class="ts-intro-soon">Full reveal soon.</p>
-    </section>
+      </div>
+    </div>
 
     <div class="ts-stage" id="ts-stage" data-base={base}>
-      <div class="ts-globe" id="ts-globe" aria-label="Globe of the Lights Out circuits" role="application"></div>
+      <!-- A still of the globe at its opening view. The live globe (globe.gl,
+           about 2 MB) only loads once the visitor moves, taps, scrolls or
+           presses a key, then fades in over it. Rebuild the still with
+           the steps in docs/globe-poster.md if the dots or the opening view change. -->
+      <img
+        class="ts-poster"
+        id="ts-poster"
+        src={`${base}/trackside/globe-poster.webp`}
+        alt=""
+        width="1600"
+        height="1600"
+        decoding="async"
+      />
+      <div
+        class="ts-globe"
+        id="ts-globe"
+        role="group"
+        aria-label="Globe of the 30 Lights Out circuits"
+        aria-describedby="ts-keys"
+        tabindex="0"
+      ></div>
     </div>
 
     <!-- Shown instead of the globe when WebGL is not available -->
-    <section class="ts-list" id="ts-list" hidden aria-labelledby="ts-list-title">
+    <section class="ts-list" id="ts-list" hidden aria-labelledby="ts-list-title" tabindex="-1">
       <h2 id="ts-list-title">The 30 circuits on the Lights Out disc</h2>
       <ol role="list">
         {sorted.map((t) => (
@@ -59,7 +94,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     <aside class="ts-panel" id="ts-panel" aria-labelledby="ts-name" hidden>
       <button type="button" class="ts-close" id="ts-close" aria-label="Close circuit details">×</button>
       <p class="ts-eyebrow"><span id="ts-code"></span><span id="ts-tag"></span></p>
-      <h2 id="ts-name"></h2>
+      <h2 id="ts-name" tabindex="-1"></h2>
       <p class="ts-country" id="ts-country"></p>
       <!-- Track outline slot: set "outline" in src/data/tracks.json to a file in public/ (e.g. "tracks/SAK.svg") -->
       <div class="ts-outline" id="ts-outline" aria-hidden="true"></div>
@@ -85,22 +120,43 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   type Track = (typeof tracks)[number];
   const $ = (id: string) => document.getElementById(id)!;
   const stage = $('ts-stage');
+  const globeEl = $('ts-globe');
+  const list = $('ts-list');
+  const viewBtn = $('ts-view') as HTMLButtonElement;
+  const spinBtn = $('ts-spin') as HTMLButtonElement;
   const base = stage.dataset.base ?? '';
   const panel = $('ts-panel');
   const byCode = new Map(tracks.map((t) => [t.code, t]));
+  const ordered = [...tracks].sort((a, b) => a.position - b.position);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const km = (n: number) => `${n.toLocaleString('en-US', { maximumFractionDigits: 3 })} km`;
 
   let globe: any = null;
+  let started = false;
   let resumeTimer = 0;
+  let userPaused = false;
   let active: HTMLElement | null = null;
   let lastFocus: HTMLElement | null = null;
+  const dots = new Map<string, HTMLButtonElement>();
+  let current = ordered[0].code; // the one dot that sits in the Tab order
 
+  /* ---- Rotation --------------------------------------------------------- */
   function setAuto(on: boolean) {
     if (!globe) return;
-    globe.controls().autoRotate = on && !reduced && panel.hidden;
+    const focusInGlobe = globeEl.contains(document.activeElement);
+    globe.controls().autoRotate = on && !reduced && !userPaused && panel.hidden && !focusInGlobe;
   }
+  function resumeLater() {
+    clearTimeout(resumeTimer);
+    resumeTimer = window.setTimeout(() => setAuto(true), 4000);
+  }
+  spinBtn.addEventListener('click', () => {
+    userPaused = !userPaused;
+    spinBtn.textContent = userPaused ? 'Play rotation' : 'Pause rotation';
+    setAuto(true);
+  });
 
+  /* ---- Panel -------------------------------------------------------------- */
   function open(t: Track, from?: HTMLElement) {
     lastFocus = from ?? (document.activeElement as HTMLElement);
     $('ts-code').textContent = t.code;
@@ -116,9 +172,9 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
       ...t.facts.map((f) => Object.assign(document.createElement('li'), { textContent: f }))
     );
     $('ts-disc').textContent = `Circuit ${t.position} of ${tracks.length}.`;
-    const slot = $('ts-outline');
     showOutline(t);
     panel.hidden = false;
+    panel.scrollTop = 0;
     document.body.classList.add('ts-open');
     if (matchMedia('(max-width: 767px)').matches && !stage.hidden) {
       requestAnimationFrame(() =>
@@ -128,13 +184,15 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
 
     if (globe) {
       active?.classList.remove('is-active');
-      active = document.querySelector(`.ts-dot[data-code="${t.code}"]`);
+      active = dots.get(t.code) ?? null;
       active?.classList.add('is-active');
-      globe.ringsData([t]);
+      setCurrent(t.code);
+      globe.ringsData(reduced ? [] : [t]);
       globe.pointOfView({ lat: t.lat, lng: t.lng, altitude: 1.5 }, reduced ? 0 : 1400);
       setAuto(false);
     }
-    $('ts-close').focus({ preventScroll: true });
+    // the heading takes focus so screen readers announce the circuit's name
+    $('ts-name').focus({ preventScroll: true });
   }
 
   // Inline the outline SVG so it takes the popcorn colour, then mark start/finish
@@ -144,7 +202,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     const slot = $('ts-outline');
     const empty = () => {
       slot.classList.add('is-empty');
-      slot.replaceChildren(Object.assign(document.createElement('span'), { textContent: 'Layout coming soon' }));
+      slot.replaceChildren(Object.assign(document.createElement('span'), { textContent: 'Outline coming soon' }));
     };
     slot.dataset.code = t.code;
     if (!t.outline) return empty();
@@ -181,8 +239,9 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     active?.classList.remove('is-active');
     active = null;
     globe?.ringsData([]);
+    const back = lastFocus && document.contains(lastFocus) ? lastFocus : null;
+    back?.focus({ preventScroll: true });
     setAuto(true);
-    lastFocus?.focus({ preventScroll: true });
   }
 
   $('ts-close').addEventListener('click', close);
@@ -190,14 +249,75 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     if (e.key === 'Escape' && !panel.hidden) close();
   });
 
+  /* ---- List view: every circuit as a button (also the no-WebGL fallback) -- */
+  document.querySelectorAll<HTMLButtonElement>('.ts-list-item').forEach((b) =>
+    b.addEventListener('click', () => open(byCode.get(b.dataset.code!)!, b))
+  );
+  function showList(on: boolean) {
+    stage.hidden = on;
+    list.hidden = !on;
+    viewBtn.setAttribute('aria-expanded', String(on));
+    viewBtn.textContent = on ? 'Back to the globe' : 'See all 30 as a list';
+    spinBtn.hidden = on || !globe || reduced;
+    if (on) {
+      globe?.controls() && (globe.controls().autoRotate = false);
+    } else {
+      setAuto(true);
+    }
+  }
+  viewBtn.addEventListener('click', () => showList(list.hidden));
+
   function fallback() {
     stage.hidden = true;
-    $('ts-list').hidden = false;
-    document.querySelectorAll<HTMLButtonElement>('.ts-list-item').forEach((b) =>
-      b.addEventListener('click', () => open(byCode.get(b.dataset.code!)!, b))
-    );
+    list.hidden = false;
+    viewBtn.hidden = true;
   }
 
+  /* ---- Keyboard: one Tab stop, arrow keys walk the disc order ------------- */
+  function setCurrent(code: string) {
+    dots.get(current)?.setAttribute('tabindex', '-1');
+    current = code;
+    dots.get(current)?.setAttribute('tabindex', '0');
+  }
+  function focusDot(code: string) {
+    const t = byCode.get(code)!;
+    setCurrent(code);
+    dots.get(code)?.focus({ preventScroll: true });
+    // turn the globe so the focused circuit faces the viewer
+    globe?.pointOfView({ lat: t.lat, lng: t.lng }, reduced ? 0 : 600);
+  }
+  globeEl.addEventListener('keydown', (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.classList?.contains('ts-dot')) return;
+    const i = ordered.findIndex((t) => t.code === target.dataset.code);
+    const n = ordered.length;
+    const to: Record<string, number> = {
+      ArrowRight: (i + 1) % n,
+      ArrowDown: (i + 1) % n,
+      ArrowLeft: (i - 1 + n) % n,
+      ArrowUp: (i - 1 + n) % n,
+      Home: 0,
+      End: n - 1,
+    };
+    if (!(e.key in to)) return;
+    e.preventDefault();
+    focusDot(ordered[to[e.key]].code);
+  });
+  globeEl.addEventListener('focusin', (e) => {
+    if (e.target === globeEl) {
+      // the group itself is only in the Tab order until the dots exist
+      if (globe && dots.size) focusDot(current);
+      else start();
+      return;
+    }
+    clearTimeout(resumeTimer);
+    setAuto(false);
+  });
+  globeEl.addEventListener('focusout', (e) => {
+    if (!globeEl.contains(e.relatedTarget as Node)) resumeLater();
+  });
+
+  /* ---- The live globe ------------------------------------------------------- */
   function hasWebGL() {
     try {
       const c = document.createElement('canvas');
@@ -208,24 +328,26 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   }
 
   async function start() {
-    if (!hasWebGL()) return fallback();
+    if (started) return;
+    started = true;
+    stopListening();
     let Globe;
     try {
       Globe = (await import('globe.gl')).default;
     } catch {
       return fallback();
     }
-    const el = $('ts-globe');
     const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     // popcorn as "r,g,b" for the ring fade (three.js reads rgba, not color-mix)
     const popcorn = (token('--color-popcorn').match(/[0-9a-f]{2}/gi) ?? ['ff', 'ff', 'ff'])
       .slice(0, 3)
       .map((h) => parseInt(h, 16))
       .join(',');
-    const size = () => [el.clientWidth, el.clientHeight];
+    const size = () => [globeEl.clientWidth, globeEl.clientHeight];
 
     try {
-      globe = new Globe(el, { animateIn: !reduced })
+      // animateIn stays off: the globe takes over from the still exactly in place
+      globe = new Globe(globeEl, { animateIn: false })
         .width(size()[0])
         .height(size()[1])
         .backgroundColor('rgba(0,0,0,0)')
@@ -233,7 +355,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
         .showAtmosphere(true)
         .atmosphereColor(token('--color-cerulean'))
         .atmosphereAltitude(0.2)
-        .htmlElementsData(tracks)
+        .htmlElementsData(ordered)
         .htmlLat('lat')
         .htmlLng('lng')
         .htmlAltitude(0.005)
@@ -242,25 +364,35 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
           b.type = 'button';
           b.className = 'ts-dot';
           b.dataset.code = d.code;
-          b.setAttribute('aria-label', `${d.name}, ${d.country}`);
-          b.innerHTML = `<span class="ts-dot-core"></span><span class="ts-dot-label">${d.name}</span>`;
+          b.tabIndex = d.code === current ? 0 : -1;
+          b.setAttribute('aria-label', `${d.name}, ${d.country}, circuit ${d.position} of ${tracks.length}`);
+          b.innerHTML = `<span class="ts-dot-core"></span><span class="ts-dot-label" aria-hidden="true">${d.name}</span>`;
           b.addEventListener('click', (e) => {
             e.stopPropagation();
+            setCurrent(d.code);
             open(d, b);
           });
+          dots.set(d.code, b);
           return b;
         })
         .ringsData([])
         .ringColor(() => (t: number) => `rgba(${popcorn},${(1 - t).toFixed(2)})`)
         .ringMaxRadius(4)
         .ringPropagationSpeed(3)
-        .ringRepeatPeriod(900);
+        .ringRepeatPeriod(900)
+        .onGlobeReady(() => {
+          stage.classList.add('is-live');
+          globeEl.removeAttribute('tabindex');
+          // someone who tabbed in while it loaded lands on the first circuit
+          if (document.activeElement === globeEl) focusDot(current);
+        });
     } catch {
-      el.replaceChildren();
+      globeEl.replaceChildren();
       return fallback();
     }
 
-    // Hide dots on the far side of the globe
+    // Hide dots on the far side of the globe (they stay reachable by keyboard:
+    // focusing one turns the globe to it)
     globe.htmlElementVisibilityModifier?.((node: HTMLElement, visible: boolean) => {
       node.classList.toggle('is-hidden', !visible);
     });
@@ -273,28 +405,43 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     controls.minDistance = 140;
     controls.maxDistance = 600;
     controls.autoRotateSpeed = 0.35;
+    spinBtn.hidden = reduced || stage.hidden;
     setAuto(true);
     controls.addEventListener('start', () => {
       clearTimeout(resumeTimer);
       controls.autoRotate = false;
     });
-    controls.addEventListener('end', () => {
-      clearTimeout(resumeTimer);
-      resumeTimer = window.setTimeout(() => setAuto(true), 4000);
-    });
+    controls.addEventListener('end', resumeLater);
 
+    // the same opening view as the still
     globe.pointOfView({ lat: 30, lng: 15, altitude: 2.4 });
     new ResizeObserver(() => {
       const [w, h] = size();
       globe.width(w).height(h);
-    }).observe(el);
+    }).observe(globeEl);
   }
 
-  start();
+  // Load the live globe on the visitor's first sign of life, not on page load:
+  // it keeps the first visit fast, and the still looks the same until then.
+  const INTENT = ['pointerdown', 'pointermove', 'keydown', 'touchstart', 'wheel', 'scroll'] as const;
+  function stopListening() {
+    INTENT.forEach((type) => removeEventListener(type, onIntent));
+  }
+  function onIntent() {
+    start();
+  }
+  if (!hasWebGL()) {
+    fallback();
+  } else {
+    INTENT.forEach((type) => addEventListener(type, onIntent, { passive: true }));
+  }
 </script>
 
 <style>
   .ts {
+    /* the intro lines up with the top bar's content edge */
+    --ts-left: max(var(--grid-margin), (100% - var(--grid-max)) / 2);
+    --ts-w: min(28rem, 36vw);
     position: relative;
     height: calc(100svh - var(--bar-h));
     overflow: hidden;
@@ -321,11 +468,43 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   .ts-stage {
     z-index: 0; /* keep the dots under the panel */
   }
+  .ts-stage[hidden] {
+    display: none;
+  }
   .ts-globe {
     cursor: grab;
+    opacity: 0;
+    transition: opacity 300ms ease;
   }
   .ts-globe:active {
     cursor: grabbing;
+  }
+  /* Before the live globe loads, focus on the group shows on the still */
+  .ts-globe:focus-visible {
+    opacity: 1;
+    outline: var(--focus-width) solid var(--color-parchment);
+    outline-offset: calc(-1 * var(--space-4));
+  }
+  /* The still: one square image as tall as the stage, centred. The live
+     globe's camera sizes the globe by the stage height too, so the two line
+     up at every width. */
+  .ts-poster {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    width: auto;
+    max-width: none;
+    translate: -50% 0;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 300ms ease;
+  }
+  .ts-stage.is-live .ts-globe {
+    opacity: 1;
+  }
+  .ts-stage.is-live .ts-poster {
+    opacity: 0;
   }
 
   /* ---- Dots (built in the script, so styled globally) ---------------------- */
@@ -357,9 +536,23 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
       0 0 16px 4px color-mix(in srgb, var(--color-popcorn) 35%, transparent);
     transition: transform var(--dur-base) var(--ease-out);
   }
-  :global(.ts-dot:hover .ts-dot-core),
+  :global(.ts-dot:focus-visible) {
+    opacity: 1;
+  }
   :global(.ts-dot:focus-visible .ts-dot-core) {
     transform: scale(1.4);
+  }
+  :global(.ts-dot:active .ts-dot-core) {
+    transform: scale(1.15);
+    transition-duration: var(--dur-fast);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    :global(.ts-dot:hover .ts-dot-core) {
+      transform: scale(1.4);
+    }
+    :global(.ts-dot:hover .ts-dot-label) {
+      opacity: 1;
+    }
   }
   :global(.ts-dot.is-active .ts-dot-core) {
     animation: ts-pulse 1.2s ease-in-out infinite;
@@ -394,7 +587,6 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     pointer-events: none;
     transition: opacity var(--dur-fast) ease;
   }
-  :global(.ts-dot:hover .ts-dot-label),
   :global(.ts-dot:focus-visible .ts-dot-label),
   :global(.ts-dot.is-active .ts-dot-label) {
     opacity: 1;
@@ -413,7 +605,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     border: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 35%, transparent);
     border-radius: var(--radius);
     backdrop-filter: blur(6px);
-    animation: ts-in 320ms var(--ease-out) both;
+    animation: ts-in 220ms var(--ease-out) both;
     z-index: 2;
   }
   .ts-panel[hidden] {
@@ -439,8 +631,25 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     line-height: 1;
     cursor: pointer;
   }
-  .ts-close:hover {
-    background: color-mix(in srgb, var(--color-parchment) 10%, transparent);
+  .ts-close {
+    transition:
+      background-color var(--dur-fast) ease,
+      transform var(--dur-fast) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ts-close:hover {
+      background: color-mix(in srgb, var(--color-parchment) 10%, transparent);
+    }
+  }
+  .ts-close:active {
+    transform: scale(0.94);
+  }
+  .ts-panel h2:focus {
+    outline: none;
+  }
+  .ts-panel h2:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: var(--space-1);
   }
   .ts-close:focus-visible {
     outline: var(--focus-width) solid var(--focus);
@@ -455,11 +664,12 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     text-transform: uppercase;
     color: var(--text-muted);
   }
+  /* popcorn is the beacon's light only, never text (tokens.css) */
   #ts-code {
     font-family: var(--font-wordmark);
     font-size: 1.125rem;
     letter-spacing: var(--tracking-wordmark);
-    color: var(--color-popcorn);
+    color: var(--text);
   }
   .ts-panel h2 {
     font-size: var(--text-h2);
@@ -578,8 +788,22 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     text-align: left;
     cursor: pointer;
   }
-  .ts-list-item:hover {
-    background: color-mix(in srgb, var(--color-parchment) 8%, transparent);
+  .ts-list-item {
+    transition: background-color var(--dur-fast) ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ts-list-item:hover {
+      background: color-mix(in srgb, var(--color-parchment) 8%, transparent);
+    }
+  }
+  .ts-list-item:active {
+    background: color-mix(in srgb, var(--color-parchment) 14%, transparent);
+  }
+  .ts-list[hidden] {
+    display: none;
+  }
+  .ts-list:focus {
+    outline: none;
   }
   .ts-pos {
     width: 1.5rem;
@@ -588,17 +812,17 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   .ts-code {
     font-family: var(--font-wordmark);
     letter-spacing: var(--tracking-wordmark);
-    color: var(--color-popcorn);
+    color: var(--text);
   }
 
   /* ---- Intro panel ----------------------------------------------------- */
   .ts-intro {
     position: absolute;
     z-index: 1;
-    left: var(--grid-margin);
+    left: var(--ts-left);
     top: 50%;
     translate: 0 -50%;
-    width: min(25rem, 34vw);
+    width: var(--ts-w);
     max-height: calc(100% - 2 * var(--space-6));
     overflow-y: auto;
     animation: ts-intro-in 600ms var(--ease-out) both;
@@ -625,25 +849,19 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     margin-bottom: var(--space-5);
   }
   .ts-intro-logo {
-    width: 6.5rem;
+    width: clamp(4.5rem, 3rem + 4vw, 6.5rem);
     height: auto;
     aspect-ratio: 1;
     border-radius: var(--radius);
   }
   .ts-intro-head h2 {
     margin: 0;
-    font-size: clamp(2.25rem, 1.25rem + 2.4vw, 3.5rem);
-  }
-  @media (max-width: 479px) {
-    .ts-intro-head {
-      grid-template-columns: 1fr;
-    }
   }
   .ts-intro h2 {
     font-family: var(--font-heading);
-    font-size: clamp(3rem, 2rem + 4vw, 5.5rem);
+    font-size: clamp(3rem, 2.4rem + 1.8vw, 4rem);
     line-height: 0.95;
-    margin: 0 0 var(--space-5);
+    white-space: nowrap;
   }
   .ts-intro p {
     font-size: var(--text-small);
@@ -651,11 +869,25 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     max-width: 34ch;
   }
   .ts-intro .ts-intro-prompt {
-    margin-top: var(--space-5);
+    margin: var(--space-5) 0 var(--space-1);
     font-family: var(--font-heading);
     font-weight: var(--weight-heading);
     font-size: var(--text-h4);
-    color: var(--color-popcorn);
+    color: var(--heading);
+  }
+  .ts-intro .ts-hint {
+    margin: 0;
+    color: var(--text-muted);
+  }
+  .ts-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    margin: var(--space-4) 0;
+  }
+  .ts-controls [hidden] {
+    display: none;
   }
   .ts-intro .ts-intro-soon {
     margin: var(--space-1) 0 0;
@@ -669,10 +901,10 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     .ts-stage,
     .ts-list {
       margin-left: 0;
-      left: calc(var(--grid-margin) + min(25rem, 34vw));
+      left: calc(var(--ts-left) + var(--ts-w));
     }
     .ts-foot {
-      left: calc(var(--grid-margin) + min(25rem, 34vw));
+      left: calc(var(--ts-left) + var(--ts-w));
     }
     :global(body.ts-open) .ts-foot {
       right: calc(min(26rem, 100% - 2 * var(--space-4)) + var(--space-4));
@@ -692,12 +924,34 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
       flex-direction: column;
     }
     .ts-intro {
-      position: static;
-      translate: none;
-      width: auto;
-      max-height: none;
-      padding: var(--space-7) var(--grid-margin) var(--space-4);
-      animation-name: fade-up;
+      display: contents;
+    }
+    .ts-intro-head,
+    .ts-cta,
+    .ts-copy {
+      padding-inline: var(--grid-margin);
+    }
+    .ts-intro-head {
+      order: 1;
+      padding-top: var(--space-6);
+      animation: fade-up 600ms var(--ease-out) both;
+    }
+    .ts-cta {
+      order: 2;
+      padding-bottom: var(--space-4);
+    }
+    .ts-stage {
+      order: 3;
+    }
+    .ts-list {
+      order: 4;
+    }
+    .ts-copy {
+      order: 5;
+      padding-block: var(--space-6) var(--space-2);
+    }
+    .ts-foot {
+      order: 6;
     }
     @keyframes fade-up {
       from {
@@ -707,6 +961,9 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     }
     .ts-intro p {
       max-width: 40rem;
+    }
+    .ts-cta .ts-intro-prompt {
+      margin-top: 0;
     }
     .ts-stage {
       position: relative;
@@ -732,6 +989,8 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     padding-inline: var(--grid-margin);
   }
   .ts-foot a {
+    display: inline-block;
+    padding-block: 4px;
     color: inherit;
     pointer-events: auto;
   }
@@ -769,7 +1028,8 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ts-intro {
+    .ts-intro,
+    .ts-intro-head {
       animation: none;
     }
     .ts-panel {
@@ -778,6 +1038,10 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     :global(.ts-dot.is-active .ts-dot-core) {
       animation: none;
       transform: scale(1.6);
+    }
+    .ts-globe,
+    .ts-poster {
+      transition: none;
     }
   }
 </style>

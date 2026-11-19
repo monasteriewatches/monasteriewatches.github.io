@@ -544,7 +544,7 @@
       "Formula 1 raced here once, in 1967, on the short Bugatti Circuit."
     ],
     "calendar": "legend",
-    "outline": null,
+    "outline": "tracks/LMS.svg",
     "verify": true
   },
   {
