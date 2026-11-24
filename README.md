@@ -4,7 +4,7 @@
 
 The website for Monasterie Watch Company, built with [Astro](https://astro.build) and deployed automatically to GitHub Pages.
 
-**Live site:** https://monasteriewatches.github.io/
+**Live site:** https://www.monasteriewatches.com/ (old address https://monasteriewatches.github.io/ redirects)
 
 ---
 

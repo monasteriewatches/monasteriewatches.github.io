@@ -2,7 +2,7 @@
  * Facts about Monasterie used in search-engine structured data (schema.org).
  * Only things stated on the site itself go here.
  */
-const SITE = 'https://monasteriewatches.github.io/';
+const SITE = 'https://www.monasteriewatches.com/';
 
 export const organization = {
   '@type': 'Organization',
