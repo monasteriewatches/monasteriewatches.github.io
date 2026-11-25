@@ -68,6 +68,16 @@ monasteriewatches.github.io/
 └── tsconfig.json           # TypeScript settings for editor support
 ```
 
+## Email list, contact and socials
+
+Everything outside the site lives in `src/data/links.ts`:
+
+- `WAITLIST_ENDPOINT`: where the "Notify me" forms send emails. Make a free form at formspree.io (or a Buttondown account) and paste its URL. Until then the form tells visitors the list opens shortly.
+- `STATUS`: the one dated line about Lights Out ("Reveal early 2027"), shown on the home page, Trackside and the footer.
+- `CONTACT_EMAIL` and `SOCIALS`: left empty, they simply don't show.
+
+The draft warranty, shipping and returns page is `src/pages/care/index.astro`. Replace it with the final terms before selling the first watch.
+
 ## Adding branches, categories and watches
 
 The homepage is the wordmark with branches drawn out to nodes; on phones it becomes the wordmark with a plain list. There are three kinds of thing you can add, each with a template and one command:

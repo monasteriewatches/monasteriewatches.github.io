@@ -1,0 +1,212 @@
+---
+/**
+ * Email list signup: one field, one button, in-voice replies.
+ * Where signups go is set once in src/data/links.ts (WAITLIST_ENDPOINT).
+ * Works without JavaScript too: the form then posts straight to the service.
+ */
+import { WAITLIST_ENDPOINT, CONTACT_EMAIL } from '../data/links';
+
+interface Props {
+  /** Unique on the page, so two forms can sit on one page. */
+  id: string;
+  /** Visible label above the field. */
+  label?: string;
+  /** Where the signup came from, saved with it (e.g. 'footer', 'trackside'). */
+  source?: string;
+  class?: string;
+}
+const { id, label = 'Hear about the reveal first', source = id, class: cls } = Astro.props;
+const live = WAITLIST_ENDPOINT !== '';
+---
+
+<form
+  class:list={['wl', cls]}
+  action={live ? WAITLIST_ENDPOINT : undefined}
+  method="post"
+  data-waitlist
+  data-endpoint={WAITLIST_ENDPOINT}
+  data-contact={CONTACT_EMAIL}
+  novalidate
+>
+  <label class="wl-label" for={`${id}-email`}>{label}</label>
+  <div class="wl-row">
+    <input
+      class="wl-input"
+      id={`${id}-email`}
+      type="email"
+      name="email"
+      autocomplete="email"
+      inputmode="email"
+      spellcheck="false"
+      placeholder="you@example.com"
+      required
+      aria-describedby={`${id}-msg`}
+    />
+    <button class="btn btn-primary wl-btn" type="submit">Notify me</button>
+  </div>
+  <!-- spam trap: people never see or fill this -->
+  <input class="wl-trap" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <input type="hidden" name="source" value={source} />
+  <p class="wl-msg" id={`${id}-msg`} role="status" aria-live="polite">One email at the reveal. No spam, ever.</p>
+</form>
+
+<style>
+  .wl {
+    width: 100%;
+    max-width: 30rem;
+    min-width: 0;
+  }
+  .wl-label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-family: var(--font-heading);
+    font-weight: var(--weight-heading);
+    font-size: var(--text-h4);
+    line-height: var(--leading-h4);
+    color: var(--heading);
+  }
+  .wl-row {
+    display: flex;
+    gap: var(--space-2);
+  }
+  .wl-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 var(--space-4);
+    border: var(--border-width) solid color-mix(in srgb, var(--text) 45%, transparent);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--text) 6%, transparent);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--text-small);
+    transition: border-color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+  }
+  .wl-input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+  .wl-input:hover {
+    border-color: color-mix(in srgb, var(--text) 70%, transparent);
+  }
+  .wl-input:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+    outline-offset: 1px;
+    border-color: var(--text);
+  }
+  .wl[data-state='error'] .wl-input {
+    border-color: var(--text);
+    border-width: 2px;
+  }
+  .wl-btn {
+    flex: none;
+  }
+  .wl-btn[aria-busy='true'] {
+    cursor: progress;
+    opacity: 0.7;
+  }
+  .wl-msg {
+    margin: var(--space-2) 0 0;
+    min-height: 1.5em;
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--text-muted);
+  }
+  .wl[data-state='done'] .wl-msg,
+  .wl[data-state='error'] .wl-msg {
+    color: var(--text);
+  }
+  .wl-msg :global(a) {
+    color: inherit;
+  }
+  .wl-trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+  .wl[data-state='done'] .wl-row {
+    display: none;
+  }
+  @media (max-width: 379px) {
+    .wl-row {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script>
+  const MSG = {
+    empty: 'Add your email first, then press Notify me.',
+    invalid: "That email doesn't look right. Check it and try again.",
+    sending: 'Sending…',
+    done: "Lights out. You're on the grid. We'll write when the watch is revealed, and not before.",
+    failed: "That didn't go through. Check your connection and try once more.",
+    notYet: 'The list opens in a few days. Check back soon.',
+  };
+
+  document.querySelectorAll<HTMLFormElement>('form[data-waitlist]').forEach((form) => {
+    const input = form.querySelector<HTMLInputElement>('input[type="email"]')!;
+    const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const msg = form.querySelector<HTMLElement>('.wl-msg')!;
+    const { endpoint = '', contact = '' } = form.dataset;
+
+    const say = (state: string, text: string) => {
+      form.dataset.state = state;
+      msg.textContent = text;
+    };
+
+    input.addEventListener('input', () => {
+      if (form.dataset.state === 'error') {
+        form.dataset.state = '';
+        input.removeAttribute('aria-invalid');
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const value = input.value.trim();
+      if (!value || !input.checkValidity()) {
+        say('error', value ? MSG.invalid : MSG.empty);
+        input.setAttribute('aria-invalid', 'true');
+        input.focus();
+        return;
+      }
+      if (!endpoint) {
+        say('error', MSG.notYet);
+        if (contact) {
+          const a = Object.assign(document.createElement('a'), {
+            href: `mailto:${contact}?subject=${encodeURIComponent('Lights Out reveal list')}&body=${encodeURIComponent(`Please add ${value} to the list.`)}`,
+            textContent: `email ${contact}`,
+          });
+          msg.append(' Or ', a, ' and we’ll add you by hand.');
+        }
+        return;
+      }
+
+      btn.setAttribute('aria-busy', 'true');
+      btn.disabled = true;
+      say('sending', MSG.sending);
+      try {
+        // Buttondown's embed URL doesn't answer cross-site requests, so its
+        // reply can't be read; a sent request is treated as success.
+        const opaque = endpoint.includes('buttondown');
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: opaque ? undefined : { Accept: 'application/json' },
+          mode: opaque ? 'no-cors' : 'cors',
+        });
+        if (!opaque && !res.ok) throw new Error(String(res.status));
+        say('done', MSG.done);
+        form.reset();
+      } catch {
+        say('error', MSG.failed);
+      } finally {
+        btn.removeAttribute('aria-busy');
+        btn.disabled = false;
+      }
+    });
+  });
+</script>

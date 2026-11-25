@@ -217,6 +217,33 @@ h4, .h4 { font-size: var(--text-h4); line-height: var(--leading-h4); }
   box-shadow: none;
 }
 
+/* ---- Browser surfaces ------------------------------------------------------
+   The parts the browser draws (selection, caret, figures) take the palette too. */
+::selection {
+  background: var(--color-popcorn);
+  color: var(--color-ink);
+}
+[data-ground='parchment'] ::selection,
+[data-ground='parchment']::selection {
+  background: var(--color-plum);
+  color: var(--color-parchment);
+}
+/* a plum section inside a parchment page goes back to the beacon's light */
+[data-ground='parchment'] [data-ground='plum'] ::selection {
+  background: var(--color-popcorn);
+  color: var(--color-ink);
+}
+input,
+textarea {
+  caret-color: currentColor;
+  accent-color: var(--btn-bg);
+}
+dd,
+td,
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- Accessibility helpers ---------------------------------------------- */
 .skip-link {
   position: absolute;

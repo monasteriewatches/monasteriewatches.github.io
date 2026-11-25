@@ -1,0 +1,144 @@
+---
+/**
+ * Care basics: warranty, shipping, returns and service.
+ * DRAFT: these are plans, written plainly, until preorders open. Replace
+ * each section with the final terms before taking the first order.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TopBar from '../../components/TopBar.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { CONTACT_EMAIL } from '../../data/links';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const sections = [
+  {
+    id: 'warranty',
+    title: 'Warranty',
+    body: [
+      'Every Monasterie watch will come with a written warranty covering the movement and the case against defects in materials and workmanship.',
+      'The length and the fine print will be published here before the first watch is sold, so you can read them before you commit to anything.',
+    ],
+  },
+  {
+    id: 'shipping',
+    title: 'Shipping',
+    body: [
+      'Watches will ship insured and tracked, in a box made for the watch inside it.',
+      'Where we ship, how long it takes and what it costs will be listed here before the first watch is sold.',
+    ],
+  },
+  {
+    id: 'returns',
+    title: 'Returns',
+    body: [
+      'If the watch isn’t right for you, you’ll be able to send it back unworn. The return window and the steps will be written out here, in plain words, before the first order.',
+    ],
+  },
+  {
+    id: 'service',
+    title: 'Service and care',
+    body: [
+      'Lights Out is built around a movement that any qualified watchmaker can service, so it won’t be tied to us for its whole life.',
+      'A short care guide, covering water, magnets, straps and setting the watch, will be published with the reveal.',
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Warranty, shipping and returns | Monasterie Watch Company"
+  description="How Monasterie plans to handle warranty, shipping, returns and service, published before the first watch is sold."
+  ground="parchment"
+>
+  <TopBar />
+  <main id="main" class="care">
+    <div class="wrap care-inner">
+      <header class="care-head">
+        <h1>Warranty, shipping and returns</h1>
+        <p class="care-lead">
+          Nothing is for sale yet. These are our plans,
+          written down early so you know what to expect. The full terms go up before the first watch is sold.
+        </p>
+      </header>
+
+      <nav class="care-toc" aria-label="On this page">
+        <ul role="list">
+          {sections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
+        </ul>
+      </nav>
+
+      <div class="care-body">
+        {sections.map((s) => (
+          <section id={s.id} aria-labelledby={`${s.id}-h`}>
+            <h2 id={`${s.id}-h`}>{s.title}</h2>
+            {s.body.map((p) => <p>{p}</p>)}
+          </section>
+        ))}
+
+        <section id="questions" aria-labelledby="questions-h">
+          <h2 id="questions-h">Questions</h2>
+          {CONTACT_EMAIL ? (
+            <p>Write to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. A person reads every email.</p>
+          ) : (
+            <p>Join the list at the bottom of this page and you'll hear first when the terms are published.</p>
+          )}
+          <p><a href={`${base}/trackside/`}>Back to Lights Out</a></p>
+        </section>
+      </div>
+    </div>
+  </main>
+  <SiteFooter />
+</BaseLayout>
+
+<style>
+  .care-inner {
+    display: grid;
+    gap: var(--space-7);
+    padding-block: var(--space-9) var(--space-9);
+    max-width: calc(46rem + 2 * var(--grid-margin));
+  }
+  .care-head h1 {
+    margin: 0 0 var(--space-4);
+    text-wrap: balance;
+  }
+  .care-lead {
+    margin: 0;
+    font-size: var(--text-h4);
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+  .care-toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-5);
+  }
+  .care-toc a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    font-size: var(--text-small);
+  }
+  .care-body {
+    display: grid;
+    gap: var(--space-7);
+  }
+  .care-body section {
+    scroll-margin-top: calc(var(--bar-h) + var(--space-5));
+    padding-top: var(--space-5);
+    border-top: var(--border-width) solid color-mix(in srgb, var(--color-plum) 14%, transparent);
+  }
+  .care-body h2 {
+    font-size: var(--text-h3);
+    margin: 0 0 var(--space-3);
+  }
+  .care-body p {
+    max-width: 65ch;
+  }
+  .care-body p:last-child {
+    margin-bottom: 0;
+  }
+</style>

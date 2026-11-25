@@ -1,0 +1,191 @@
+---
+/**
+ * The footer on every page: the email list, the status line, every page
+ * on the site, and the care basics buyers look for before they commit.
+ * Contact and social links come from src/data/links.ts and hide when empty.
+ */
+import Logo from './Logo.astro';
+import Waitlist from './Waitlist.astro';
+import { STATUS, CONTACT_EMAIL, SOCIALS } from '../data/links';
+
+interface Props {
+  /** Leave the email form out (for pages that already show one up top). */
+  noForm?: boolean;
+}
+const { noForm = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const socials = SOCIALS.filter((s) => s.href);
+const year = new Date().getFullYear();
+
+const columns = [
+  {
+    title: 'Lights Out',
+    links: [
+      { label: 'Trackside Series', href: `${base}/trackside/` },
+      { label: 'The details', href: `${base}/trackside/#details` },
+      { label: 'Check the fit', href: `${base}/trackside/fit/` },
+    ],
+  },
+  {
+    title: 'Monasterie',
+    links: [
+      { label: 'Brand Identity', href: `${base}/brand-identity/` },
+      { label: 'The founder', href: `${base}/brand-identity/#founder` },
+      ...(CONTACT_EMAIL ? [{ label: 'Contact', href: `mailto:${CONTACT_EMAIL}` }] : []),
+    ],
+  },
+  {
+    title: 'Care',
+    links: [
+      { label: 'Warranty', href: `${base}/care/#warranty` },
+      { label: 'Shipping', href: `${base}/care/#shipping` },
+      { label: 'Returns', href: `${base}/care/#returns` },
+      { label: 'Service', href: `${base}/care/#service` },
+    ],
+  },
+];
+---
+
+<footer class="sf" data-ground="plum">
+  <div class="wrap sf-inner">
+    <div class="sf-lead">
+      <a class="sf-home" href={`${base}/`} aria-label="Monasterie Watch Company, home">
+        <Logo variant="wordmark-name" width="11rem" decorative />
+      </a>
+      <p class="sf-status"><span class="sf-dot" aria-hidden="true"></span>Lights Out · {STATUS}</p>
+      {!noForm && <Waitlist id="footer-list" source="footer" />}
+    </div>
+
+    <nav class="sf-nav" aria-label="Footer">
+      {columns.map((c) => (
+        <div class="sf-col">
+          <h2 class="sf-title">{c.title}</h2>
+          <ul role="list">
+            {c.links.map((l) => (
+              <li><a href={l.href}>{l.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+
+    <div class="sf-base">
+      <p>© {year} Monasterie Watch Company · <em>Conversatio Morum</em></p>
+      {socials.length > 0 && (
+        <ul class="sf-social" role="list" aria-label="Monasterie elsewhere">
+          {socials.map((s) => (
+            <li><a href={s.href} rel="me noopener" target="_blank">{s.name}</a></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+</footer>
+
+<style>
+  .sf {
+    background: var(--bg);
+    color: var(--text);
+    padding-block: var(--space-8) var(--space-6);
+  }
+  .sf-inner {
+    display: grid;
+    gap: var(--space-7);
+  }
+  .sf-inner > * {
+    min-width: 0;
+  }
+  .sf-home {
+    display: inline-flex;
+    min-height: var(--tap-min);
+    align-items: center;
+  }
+  .sf-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 var(--space-6);
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+  /* the beacon's light, used as it is everywhere else: popcorn on plum */
+  .sf-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-popcorn);
+  }
+  .sf-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-5);
+  }
+  .sf-title {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-body);
+    font-size: var(--text-label);
+    font-weight: var(--weight-body-strong);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .sf ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sf-col a,
+  .sf-social a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    color: var(--text);
+    font-size: var(--text-small);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
+    text-decoration-color: transparent;
+    transition: text-decoration-color var(--dur-base) var(--ease);
+  }
+  .sf-col a:hover,
+  .sf-col a:focus-visible,
+  .sf-social a:hover,
+  .sf-social a:focus-visible {
+    text-decoration-color: currentColor;
+  }
+  .sf-base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+    padding-top: var(--space-5);
+    border-top: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 40%, transparent);
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+  .sf-base p {
+    margin: 0;
+    max-width: none;
+  }
+  .sf-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .sf-nav {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .sf-inner {
+      grid-template-columns: 5fr 6fr;
+      column-gap: var(--space-9);
+    }
+    .sf-base {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
