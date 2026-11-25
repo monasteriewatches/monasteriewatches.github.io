@@ -4,6 +4,8 @@ import TopBar from '../components/TopBar.astro';
 import Logo from '../components/Logo.astro';
 import Seal from '../components/Seal.astro';
 import WorkbenchIcon from '../components/icons/WorkbenchIcon.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { STATUS } from '../data/links';
 import { organization, SITE_URL } from '../data/site';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -147,7 +149,6 @@ const principles = [
     <!-- 4. Conversatio Morum -->
     <section class="bi-screen bi-motto" data-ground="plum" aria-labelledby="motto">
       <div class="wrap">
-        <p class="label muted">Our motto</p>
         <h2 id="motto" class="bi-motto-title"><span>Conversatio</span> <span>Morum</span></h2>
         <div class="bi-motto-text">
           <p>
@@ -179,9 +180,8 @@ const principles = [
             people can look up to.
           </p>
           <p>
-            The icon is the tower's window with its light on: the beacon of hope. The
-            wordmark is set in Metamorphous, always in capitals. In the second wordmark the A
-            becomes the window itself.
+            The icon is the tower's window with its light on: the beacon of hope. Look
+            closely at the A in our name and you'll find the same window, lit from inside.
           </p>
         </div>
         <div class="bi-marks-board">
@@ -200,7 +200,6 @@ const principles = [
     <section class="bi-screen" aria-labelledby="design">
       <div class="wrap bi-design">
         <div class="bi-text">
-          <p class="label muted">What we design</p>
           <h2 id="design">Our design language</h2>
           <p>
             Every Monasterie design starts with two questions: who is it for, and where can this
@@ -241,6 +240,8 @@ const principles = [
 
     <!-- 7. The founder -->
     <section class="bi-screen bi-founder-section" aria-labelledby="founder">
+      <!-- SLOT: a founder photo goes here when there is one. Drop it in
+           public/images/ and add a <figure class="bi-photo"> before the text. -->
       <div class="wrap bi-founder">
         <div>
           <h2 id="founder">The founder</h2>
@@ -267,13 +268,21 @@ const principles = [
         </div>
       </div>
     </section>
+
+    <!-- 8. Where it goes next -->
+    <section class="bi-next" aria-labelledby="next">
+      <div class="wrap bi-next-inner">
+        <h2 id="next">The first watch from the workshop</h2>
+        <p>
+          Lights Out is for the fans who plan their weekends around a race. It's the first
+          watch in our Trackside Series. {STATUS}.
+        </p>
+        <a class="btn btn-primary" href={`${base}/trackside/`}>Meet Lights Out</a>
+      </div>
+    </section>
   </main>
 
-  <footer class="bi-footer">
-    <div class="wrap bi-footer-inner">
-      <p class="small">Monasterie Watch Company · Conversatio Morum</p>
-    </div>
-  </footer>
+  <SiteFooter />
 </BaseLayout>
 
 <style>
@@ -605,21 +614,25 @@ const principles = [
     }
   }
 
-  /* ---- Footer -------------------------------------------------------------- */
-  .bi-footer {
-    padding-block: var(--space-7);
+  /* ---- 8. Where it goes next ------------------------------------------------- */
+  .bi-next {
+    padding-block: var(--space-9);
     border-top: var(--border-width) solid color-mix(in srgb, var(--color-plum) 14%, transparent);
+    text-align: center;
   }
-  .bi-footer-inner p {
-    margin: 0 0 var(--space-2);
-    max-width: none;
+  .bi-next-inner {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
   }
-  /* 44px tall tap area on the credit links; the negative margin keeps the
-     line spacing exactly as it was */
-  .bi-footer-inner a {
-    display: inline-block;
-    padding-block: 11px;
-    margin-block: -11px;
+  .bi-next h2 {
+    margin: 0;
+    text-wrap: balance;
+  }
+  .bi-next p {
+    margin: 0 0 var(--space-3);
+    max-width: 34rem;
+    color: var(--text-muted);
   }
 
   /* ---- Motion -------------------------------------------------------------- */
