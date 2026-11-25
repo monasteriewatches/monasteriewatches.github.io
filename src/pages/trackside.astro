@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TopBar from '../components/TopBar.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import Waitlist from '../components/Waitlist.astro';
+import { STATUS } from '../data/links';
 import tracks from '../data/tracks.json';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -9,11 +12,12 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
 
 <BaseLayout
   title="Trackside Series: the Lights Out circuits | Monasterie"
-  description="Spin the globe and explore the thirty circuits on the Lights Out track disc, from Sakhir to Hockenheim, with lap length, laps and history for each."
+  description="Spin the globe and explore the thirty circuits of Lights Out, from Sakhir to Hockenheim, with lap length, laps and history for each."
 >
   <TopBar />
-  <main id="main" class="ts">
-    <h1 class="visually-hidden">Trackside Series: the 30 circuits on the Lights Out disc</h1>
+  <main id="main">
+  <section class="ts" aria-labelledby="ts-intro-title">
+    <h1 class="visually-hidden">Trackside Series: Lights Out and its 30 circuits</h1>
 
     <!-- On tablets and phones this wrapper steps aside (display: contents) so
          the title and controls sit above the globe and the story below it. -->
@@ -34,7 +38,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
       <div class="ts-copy">
       <p>Five red lights. Then nothing. Lights Out is the first watch in the Monasterie Trackside Series, built to rethink what a motorsport watch can be.</p>
       <p>Not a logo stamped on a chronograph. A watch for the fans who plan weekends around qualifying, set alarms for races on the far side of the world, and know every corner by name.</p>
-      <p>Engineered to outperform watches at twice its price. Priced for the people who actually watch.</p>
+      <p>Built around a second time zone, so the race on the other side of the world is one glance away.</p>
       </div>
       <div class="ts-cta">
       <p class="ts-intro-prompt">Spin the globe. Find your circuit.</p>
@@ -47,7 +51,11 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
         </button>
         <button type="button" class="btn btn-text btn-sm" id="ts-spin" hidden>Pause rotation</button>
       </div>
-      <p class="ts-intro-soon">Full reveal soon.</p>
+      <p class="ts-intro-soon">{STATUS}</p>
+      <div class="ts-next">
+        <a class="btn btn-primary btn-sm" href="#reveal">Get the reveal email</a>
+        <a class="btn btn-text btn-sm" href="#details">See the details</a>
+      </div>
       </div>
     </div>
 
@@ -60,7 +68,10 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
         class="ts-poster"
         id="ts-poster"
         src={`${base}/trackside/globe-poster.webp`}
-        alt=""
+        srcset={`${base}/trackside/globe-poster-800.webp 800w, ${base}/trackside/globe-poster.webp 1600w`}
+        sizes="(max-width: 1023px) min(75svh, 100vw), 100svh"
+        fetchpriority="high"
+        alt="The globe at night, with a gold dot on each of the 30 circuits"
         width="1600"
         height="1600"
         decoding="async"
@@ -77,7 +88,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
 
     <!-- Shown instead of the globe when WebGL is not available -->
     <section class="ts-list" id="ts-list" hidden aria-labelledby="ts-list-title" tabindex="-1">
-      <h2 id="ts-list-title">The 30 circuits on the Lights Out disc</h2>
+      <h2 id="ts-list-title">The 30 Lights Out circuits</h2>
       <ol role="list">
         {sorted.map((t) => (
           <li>
@@ -108,10 +119,89 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
       <h3>Two things to know</h3>
       <ul class="ts-facts" id="ts-facts" role="list"></ul>
       <p class="ts-disc" id="ts-disc"></p>
+      <div class="ts-actions">
+        <button type="button" class="btn btn-primary btn-sm" id="ts-share">This is my circuit</button>
+        <a class="btn btn-text btn-sm" href="#reveal" id="ts-to-list">Get the reveal email</a>
+      </div>
+      <p class="ts-share-msg" id="ts-share-msg" role="status" aria-live="polite"></p>
     </aside>
 
-    <footer class="ts-foot">Lights Out — Trackside Series by Monasterie. Not affiliated with Formula 1. Circuit outlines from <a href="https://github.com/bacinger/f1-circuits">f1-circuits</a> by Tomislav Bacinger (MIT).</footer>
+    <p class="ts-foot">Lights Out, Trackside Series by Monasterie. Not affiliated with Formula 1. Circuit outlines from <a href="https://github.com/bacinger/f1-circuits">f1-circuits</a> by Tomislav Bacinger (MIT).</p>
+  </section>
+
+  <section class="td" id="details" aria-labelledby="td-title">
+    <div class="wrap">
+      <header class="td-head">
+        <h2 id="td-title">Lights Out, in detail</h2>
+        <p class="td-lead">These are the planned specifications. The final numbers come with the reveal.</p>
+      </header>
+
+      <ul class="td-highlights" role="list" aria-label="Highlights">
+        <li><span class="td-hl-num num">38 mm</span><span class="td-hl-label">case, sized to wear all weekend</span></li>
+        <li><span class="td-hl-num num">100 m</span><span class="td-hl-label">water resistance, screw-down crown</span></li>
+        <li><span class="td-hl-num">GMT</span><span class="td-hl-label">automatic, with a second time zone</span></li>
+        <li><span class="td-hl-num">Sapphire</span><span class="td-hl-label">domed crystal</span></li>
+      </ul>
+
+      <div class="td-chapters">
+        <article class="td-chapter" aria-labelledby="td-dial">
+          <h3 id="td-dial">The dial</h3>
+          <p>Tarmac grey and sandblasted, like a track surface seen up close. The hour markers are solid blocks of lume with no metal around them, so the whole marker glows after dark. Every printed line is signal yellow.</p>
+          <p>There's one more window on the dial. It stays covered until the reveal.</p>
+        </article>
+        <article class="td-chapter" aria-labelledby="td-case">
+          <h3 id="td-case">The case</h3>
+          <p>Shaped after a race car's air intake. It's 38 mm across and about 48 mm from lug to lug, and we're holding it under 12.5 mm tall with a domed sapphire crystal on top. A rubber strap keeps it comfortable through a long race.</p>
+        </article>
+        <article class="td-chapter" aria-labelledby="td-movement">
+          <h3 id="td-movement">The movement</h3>
+          <p>An automatic GMT. Set the extra hand to the circuit's time zone and you'll know when the lights go out there without doing the math. It's a movement any qualified watchmaker can service.</p>
+        </article>
+      </div>
+
+      <div class="td-specs-wrap">
+        <h3 class="td-specs-title">Planned specifications</h3>
+        <dl class="td-specs">
+          <div><dt>Case diameter</dt><dd>38 mm</dd></div>
+          <div><dt>Lug to lug</dt><dd>about 48 mm</dd></div>
+          <div><dt>Height</dt><dd>12.5 mm or less</dd></div>
+          <div><dt>Lug width</dt><dd>20 mm</dd></div>
+          <div><dt>Crystal</dt><dd>Domed sapphire</dd></div>
+          <div><dt>Water resistance</dt><dd>100 m, screw-down crown</dd></div>
+          <div><dt>Movement</dt><dd>Automatic GMT</dd></div>
+          <div><dt>Strap</dt><dd>Rubber</dd></div>
+        </dl>
+      </div>
+
+      <div class="td-fit">
+        <figure class="td-fit-fig">
+          <svg viewBox="0 0 60 70" role="img" aria-labelledby="td-fit-cap">
+            <rect class="td-strap" x="20" y="0" width="20" height="70" rx="1" />
+            <rect class="td-lugs" x="19" y="11" width="22" height="48" rx="2" />
+            <circle class="td-case" cx="30" cy="35" r="19" />
+            <circle class="td-dial" cx="30" cy="35" r="15.5" />
+            <line class="td-dim" x1="11" y1="35" x2="49" y2="35" />
+          </svg>
+          <figcaption id="td-fit-cap">Fig. 1: case outline, 38 mm across, 48 mm lug to lug.</figcaption>
+        </figure>
+        <div class="td-fit-text">
+          <h3>Check the fit before the reveal</h3>
+          <p>Size is the hardest thing to judge on a screen. Print the outline at actual size, cut it out and hold it on your wrist.</p>
+          <a class="btn btn-secondary" href={`${base}/trackside/fit/`}>Print the outline</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tr" id="reveal" aria-labelledby="tr-title">
+    <div class="wrap tr-inner">
+      <h2 id="tr-title">Be there when the covers come off</h2>
+      <p class="tr-lead">One email when Lights Out is revealed. Nothing else.</p>
+      <Waitlist id="trackside-list" source="trackside" label="Your email" />
+    </div>
+  </section>
   </main>
+  <SiteFooter noForm />
 </BaseLayout>
 
 <script>
@@ -173,6 +263,9 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     );
     $('ts-disc').textContent = `Circuit ${t.position} of ${tracks.length}.`;
     showOutline(t);
+    shown = t;
+    $('ts-share-msg').textContent = '';
+    history.replaceState(null, '', `#${t.code}`);
     panel.hidden = false;
     panel.scrollTop = 0;
     document.body.classList.add('ts-open');
@@ -234,6 +327,8 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   }
 
   function close() {
+    if (location.hash.slice(1) === shown?.code) history.replaceState(null, '', location.pathname);
+    shown = null;
     panel.hidden = true;
     document.body.classList.remove('ts-open');
     active?.classList.remove('is-active');
@@ -245,6 +340,33 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   }
 
   $('ts-close').addEventListener('click', close);
+
+  /* ---- "This is my circuit": a link straight back to it -------------------- */
+  let shown: Track | null = null;
+  $('ts-share').addEventListener('click', async () => {
+    if (!shown) return;
+    const t = shown;
+    const url = `${location.origin}${location.pathname}#${t.code}`;
+    const msg = $('ts-share-msg');
+    const data = {
+      title: `My circuit: ${t.name}`,
+      text: `${t.name} is my circuit. Lights Out, by Monasterie.`,
+      url,
+    };
+    try {
+      if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+        await navigator.share(data);
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      msg.textContent = `Link copied. Send it to someone who thinks ${t.name} isn't the best circuit.`;
+    } catch (err) {
+      if ((err as DOMException)?.name === 'AbortError') return; // they closed the share sheet
+      msg.textContent = `Copy this link: ${url}`;
+    }
+  });
+  // leaving the panel for the email form closes it first
+  $('ts-to-list').addEventListener('click', () => close());
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !panel.hidden) close();
   });
@@ -382,9 +504,13 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
         .ringRepeatPeriod(900)
         .onGlobeReady(() => {
           stage.classList.add('is-live');
+          // the live globe (labelled above) takes over; the faded still steps out
+          setTimeout(() => $('ts-poster').remove(), 1000);
           globeEl.removeAttribute('tabindex');
           // someone who tabbed in while it loaded lands on the first circuit
           if (document.activeElement === globeEl) focusDot(current);
+          // a shared link opened a circuit before the globe was ready
+          if (shown) open(shown, dots.get(shown.code));
         });
     } catch {
       globeEl.replaceChildren();
@@ -434,6 +560,18 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     fallback();
   } else {
     INTENT.forEach((type) => addEventListener(type, onIntent, { passive: true }));
+  }
+
+  // The panel belongs to the globe: scrolling past the globe closes it.
+  new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting && !panel.hidden) close();
+  }).observe(document.querySelector('.ts')!);
+
+  // A shared link (/trackside/#SIL) opens straight to that circuit.
+  const linked = byCode.get(location.hash.slice(1).toUpperCase());
+  if (linked) {
+    open(linked);
+    if (hasWebGL()) start();
   }
 </script>
 
@@ -906,8 +1044,9 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     .ts-foot {
       left: calc(var(--ts-left) + var(--ts-w));
     }
+    /* the open panel needs the room; the credit comes back when it closes */
     :global(body.ts-open) .ts-foot {
-      right: calc(min(26rem, 100% - 2 * var(--space-4)) + var(--space-4));
+      visibility: hidden;
     }
     .ts-list {
       position: absolute;
@@ -1042,6 +1181,216 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     .ts-globe,
     .ts-poster {
       transition: none;
+    }
+  }
+  /* ---- Intro: next steps ---------------------------------------------------- */
+  .ts-next {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-4);
+  }
+  p.ts-foot {
+    margin: 0;
+    max-width: none;
+  }
+  @media (max-width: 1023px) {
+    p.ts-foot {
+      position: static;
+    }
+  }
+
+  /* ---- Panel: the circuit leads somewhere ------------------------------------ */
+  .ts-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 30%, transparent);
+  }
+  .ts-share-msg {
+    margin: var(--space-2) 0 0;
+    min-height: 1.5em;
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  /* ---- Details ------------------------------------------------------------ */
+  .td,
+  .tr {
+    border-top: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 30%, transparent);
+  }
+  .td {
+    padding-block: var(--space-9);
+  }
+  .td-head {
+    max-width: 40rem;
+    margin-bottom: var(--space-7);
+  }
+  .td-head h2,
+  .tr h2 {
+    margin: 0 0 var(--space-3);
+    text-wrap: balance;
+  }
+  .td-lead,
+  .tr-lead {
+    margin: 0;
+    color: var(--text-muted);
+  }
+  .td-highlights {
+    list-style: none;
+    margin: 0 0 var(--space-8);
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-5);
+  }
+  .td-highlights li {
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+  }
+  .td-hl-num {
+    font-family: var(--font-heading);
+    font-weight: var(--weight-heading);
+    font-size: var(--text-h2);
+    line-height: 1;
+    color: var(--heading);
+  }
+  .td-hl-label {
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--text-muted);
+    max-width: 14rem;
+  }
+  .td-chapters {
+    display: grid;
+    gap: var(--space-7);
+    margin-bottom: var(--space-8);
+  }
+  .td-chapter h3,
+  .td-specs-title,
+  .td-fit h3 {
+    font-size: var(--text-h3);
+    margin: 0 0 var(--space-3);
+  }
+  .td-chapter p {
+    max-width: 38rem;
+  }
+  .td-chapter p:last-child {
+    margin-bottom: 0;
+  }
+  .td-specs-wrap {
+    margin-bottom: var(--space-8);
+  }
+  .td-specs {
+    margin: 0;
+    display: grid;
+    border-top: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 30%, transparent);
+  }
+  .td-specs div {
+    display: grid;
+    grid-template-columns: minmax(8rem, 1fr) 2fr;
+    gap: var(--space-4);
+    padding-block: var(--space-3);
+    border-bottom: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 30%, transparent);
+  }
+  .td-specs dt {
+    color: var(--text-muted);
+    font-size: var(--text-small);
+  }
+  .td-specs dd {
+    margin: 0;
+    font-size: var(--text-small);
+  }
+  .td-fit {
+    display: grid;
+    gap: var(--space-6);
+    align-items: center;
+  }
+  .td-fit-fig {
+    margin: 0;
+    justify-self: center;
+    width: min(100%, 15rem);
+  }
+  .td-fit-fig svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .td-strap {
+    fill: color-mix(in srgb, var(--color-parchment) 8%, transparent);
+  }
+  .td-lugs,
+  .td-case,
+  .td-dial {
+    fill: none;
+    stroke: var(--color-parchment);
+    stroke-width: 0.35;
+  }
+  .td-case {
+    fill: var(--color-plum);
+  }
+  .td-dial {
+    stroke: var(--color-cerulean);
+    stroke-dasharray: 1 1;
+  }
+  .td-dim {
+    stroke: var(--color-cerulean);
+    stroke-width: 0.25;
+  }
+  .td-fit-fig figcaption {
+    margin-top: var(--space-3);
+    text-align: center;
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+  .td-fit-text p {
+    max-width: 30rem;
+  }
+
+  /* ---- Reveal list -------------------------------------------------------- */
+  .tr {
+    padding-block: var(--space-9);
+    background: color-mix(in srgb, var(--color-plum) 70%, var(--color-ink));
+  }
+  .tr-inner {
+    display: grid;
+    gap: var(--space-5);
+    justify-items: start;
+  }
+  .tr-inner > * {
+    max-width: 34rem;
+    width: 100%;
+  }
+  .tr-lead {
+    margin-bottom: var(--space-2);
+  }
+
+  @media (min-width: 768px) {
+    .td-highlights {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .td-chapters {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+    .td-fit {
+      grid-template-columns: 15rem 1fr;
+      gap: var(--space-8);
+    }
+  }
+  @media (min-width: 1024px) {
+    .td-specs-wrap {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: var(--space-6);
     }
   }
 </style>

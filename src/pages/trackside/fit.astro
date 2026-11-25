@@ -1,0 +1,181 @@
+---
+/**
+ * Printable 1:1 outline of the Lights Out case, so people can check the
+ * size on their own wrist before the reveal. Drawn in real millimetres.
+ * If the case size changes, change the numbers in CASE below.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TopBar from '../../components/TopBar.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const CASE = { diameter: 38, lugToLug: 48, lugWidth: 20 };
+const W = 70; // drawing area, mm
+const H = 80;
+const cx = W / 2;
+const cy = H / 2;
+const r = CASE.diameter / 2;
+---
+
+<BaseLayout
+  title="Check the fit: Lights Out at actual size | Monasterie"
+  description="Print the Lights Out case outline at actual size, cut it out and hold it on your wrist: 38 mm across, 48 mm lug to lug."
+  ground="parchment"
+>
+  <TopBar />
+  <main id="main" class="fit">
+    <div class="wrap fit-inner">
+      <header class="fit-head">
+        <h1>Check the fit</h1>
+        <p class="fit-lead">Lights Out at actual size: {CASE.diameter} mm across, {CASE.lugToLug} mm from lug to lug.</p>
+      </header>
+
+      <ol class="fit-steps no-print">
+        <li>Print this page with the scale set to <strong>100%</strong> or <strong>Actual size</strong>, not “Fit to page”.</li>
+        <li>Measure the bar under the outline. If it's 50 mm long, the print is true to size.</li>
+        <li>Cut along the solid line and hold it on your wrist, lugs pointing up and down your arm.</li>
+      </ol>
+      <button type="button" class="btn btn-primary no-print" id="fit-print">Print the outline</button>
+
+      <figure class="fit-sheet">
+        <svg
+          width={`${W}mm`}
+          height={`${H + 14}mm`}
+          viewBox={`0 0 ${W} ${H + 14}`}
+          role="img"
+          aria-label={`The Lights Out case outline at actual size, ${CASE.diameter} millimetres across and ${CASE.lugToLug} millimetres lug to lug, with a 50 millimetre check bar.`}
+        >
+          <!-- strap, dashed: where the rubber strap would run -->
+          <rect class="s-strap" x={cx - CASE.lugWidth / 2} y="2" width={CASE.lugWidth} height={H - 4} />
+          <!-- lugs and case, solid: the cut line -->
+          <rect class="s-cut" x={cx - CASE.lugWidth / 2 - 1} y={cy - CASE.lugToLug / 2} width={CASE.lugWidth + 2} height={CASE.lugToLug} rx="2" />
+          <circle class="s-cut s-fill" cx={cx} cy={cy} r={r} />
+          <circle class="s-guide" cx={cx} cy={cy} r={r - 3.5} />
+          <line class="s-guide" x1={cx} y1={cy - 2} x2={cx} y2={cy + 2} />
+          <line class="s-guide" x1={cx - 2} y1={cy} x2={cx + 2} y2={cy} />
+          <text class="s-text" x={cx} y={cy + r - 6} text-anchor="middle">LIGHTS OUT</text>
+          <!-- 50 mm check bar -->
+          <g transform={`translate(${(W - 50) / 2} ${H + 5})`}>
+            <line class="s-bar" x1="0" y1="0" x2="50" y2="0" />
+            <line class="s-bar" x1="0" y1="-1.5" x2="0" y2="1.5" />
+            <line class="s-bar" x1="50" y1="-1.5" x2="50" y2="1.5" />
+            <text class="s-text" x="25" y="5.5" text-anchor="middle">50 mm</text>
+          </g>
+        </svg>
+        <figcaption>monasteriewatches.com · Lights Out, planned case size</figcaption>
+      </figure>
+
+      <p class="fit-note no-print">
+        The case shape may still change before the reveal; the size is what this sheet is for.
+        <a href={`${base}/trackside/#details`}>Back to the details</a>
+      </p>
+    </div>
+  </main>
+  <SiteFooter />
+</BaseLayout>
+
+<style>
+  .fit-inner {
+    display: grid;
+    gap: var(--space-6);
+    justify-items: start;
+    padding-block: var(--space-9);
+    max-width: calc(44rem + 2 * var(--grid-margin));
+  }
+  .fit-head h1 {
+    margin: 0 0 var(--space-3);
+  }
+  .fit-lead {
+    margin: 0;
+    font-size: var(--text-h4);
+    color: var(--text-muted);
+  }
+  .fit-steps {
+    margin: 0;
+    padding-left: 1.25em;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .fit-steps li {
+    max-width: 60ch;
+    padding-left: var(--space-1);
+  }
+  .fit-sheet {
+    margin: 0;
+    justify-self: center;
+    padding: var(--space-6);
+    background: #fff;
+    border: var(--border-width) solid color-mix(in srgb, var(--color-plum) 18%, transparent);
+    border-radius: var(--radius);
+    text-align: center;
+  }
+  .fit-sheet svg {
+    display: block;
+    margin: 0 auto;
+  }
+  .fit-sheet figcaption {
+    margin-top: var(--space-3);
+    font-size: var(--text-label);
+    color: var(--color-ink-muted);
+  }
+  .s-cut {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 0.3;
+  }
+  .s-fill {
+    fill: #fff;
+  }
+  .s-strap {
+    fill: none;
+    stroke: var(--color-ink-muted);
+    stroke-width: 0.2;
+    stroke-dasharray: 1.2 1;
+  }
+  .s-guide {
+    fill: none;
+    stroke: var(--color-ink-muted);
+    stroke-width: 0.15;
+  }
+  .s-bar {
+    stroke: var(--color-ink);
+    stroke-width: 0.3;
+  }
+  .s-text {
+    font-family: var(--font-body);
+    font-size: 2.6px;
+    letter-spacing: 0.3px;
+    fill: var(--color-ink);
+  }
+  .fit-note {
+    margin: 0;
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+
+  @media print {
+    .no-print,
+    :global(.topbar),
+    :global(.sf),
+    :global(.skip-link) {
+      display: none !important;
+    }
+    :global(body) {
+      background: #fff;
+    }
+    .fit-inner {
+      padding: 0;
+    }
+    .fit-sheet {
+      border: 0;
+      padding: 0;
+    }
+  }
+  @page {
+    margin: 15mm;
+  }
+</style>
+
+<script>
+  document.getElementById('fit-print')?.addEventListener('click', () => window.print());
+</script>

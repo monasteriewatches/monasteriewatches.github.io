@@ -30,3 +30,12 @@ changes (a change to `pointOfView({ lat: 30, lng: 15, altitude: 2.4 })` in
 The image must stay square and centred, with the globe at the same size as in the
 capture. The page shows it at the stage's full height, which is also how the live
 globe sizes itself, so the two line up at every width.
+
+## Phone-size copy
+
+The Trackside page also serves `public/trackside/globe-poster-800.webp` to phones.
+After rebuilding the still, make the 800 × 800 copy too, for example:
+
+```bash
+python3 -c "from PIL import Image; Image.open('public/trackside/globe-poster.webp').resize((800,800), Image.LANCZOS).save('public/trackside/globe-poster-800.webp','WEBP',quality=80,method=6)"
+```
