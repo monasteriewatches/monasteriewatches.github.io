@@ -17,7 +17,7 @@ export const STATUS = 'Reveal early 2027';
  * Until this is filled in, the form tells visitors the list opens shortly
  * and offers the contact email instead (if there is one).
  */
-export const WAITLIST_ENDPOINT = 'https://app.kit.com/forms/10245021/subscriptions';
+export const WAITLIST_ENDPOINT = 'https://app.kit.com/forms/10245115/subscriptions';
 
 /** Public contact address shown in the footer, e.g. 'hello@monasteriewatches.com'. */
 export const CONTACT_EMAIL = '';
