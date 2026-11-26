@@ -202,11 +202,21 @@ const isKit = /kit\.com|convertkit/.test(WAITLIST_ENDPOINT);
       try {
         if (isKit) {
           // Kit's form endpoint answers in JSON: { status: 'success' | 'quarantined' | ... }
-          const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email_address: value }),
-          });
+          // Sent as a plain form post, the same way Kit's own embed code sends it.
+          let res: Response;
+          try {
+            res = await fetch(endpoint, {
+              method: 'POST',
+              headers: { Accept: 'application/json' },
+              body: new URLSearchParams({ email_address: value }),
+            });
+          } catch {
+            // The browser blocked reading Kit's reply: post the form the
+            // old-fashioned way instead, and Kit shows its own thank-you page.
+            form.querySelectorAll('input:not([type="email"])').forEach((el) => el.removeAttribute('name'));
+            HTMLFormElement.prototype.submit.call(form);
+            return;
+          }
           const data = await res.json().catch(() => ({}));
           if (data.status === 'success') {
             say('done', `${MSG.done} Check your inbox: you may need to tap confirm.`);
