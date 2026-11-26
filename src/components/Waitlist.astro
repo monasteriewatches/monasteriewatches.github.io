@@ -17,6 +17,8 @@ interface Props {
 }
 const { id, label = 'Hear about the reveal first', source = id, class: cls } = Astro.props;
 const live = WAITLIST_ENDPOINT !== '';
+// Kit names its email field email_address; Formspree and Buttondown use email.
+const isKit = /kit\.com|convertkit/.test(WAITLIST_ENDPOINT);
 ---
 
 <form
@@ -34,7 +36,7 @@ const live = WAITLIST_ENDPOINT !== '';
       class="wl-input"
       id={`${id}-email`}
       type="email"
-      name="email"
+      name={isKit ? 'email_address' : 'email'}
       autocomplete="email"
       inputmode="email"
       spellcheck="false"
@@ -143,6 +145,7 @@ const live = WAITLIST_ENDPOINT !== '';
     sending: 'Sending…',
     done: "Lights out. You're on the grid. We'll write when the watch is revealed, and not before.",
     failed: "That didn't go through. Check your connection and try once more.",
+    human: 'One more step: ',
     notYet: 'The list opens in a few days. Check back soon.',
   };
 
@@ -151,6 +154,8 @@ const live = WAITLIST_ENDPOINT !== '';
     const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     const msg = form.querySelector<HTMLElement>('.wl-msg')!;
     const { endpoint = '', contact = '' } = form.dataset;
+    const isKit = /kit\.com|convertkit/.test(endpoint);
+    const trap = form.querySelector<HTMLInputElement>('.wl-trap')!;
 
     const say = (state: string, text: string) => {
       form.dataset.state = state;
@@ -185,10 +190,46 @@ const live = WAITLIST_ENDPOINT !== '';
         return;
       }
 
+      // a bot filled the hidden field: thank it and send nothing
+      if (trap.value) {
+        say('done', MSG.done);
+        return;
+      }
+
       btn.setAttribute('aria-busy', 'true');
       btn.disabled = true;
       say('sending', MSG.sending);
       try {
+        if (isKit) {
+          // Kit's form endpoint answers in JSON: { status: 'success' | 'quarantined' | ... }
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email_address: value }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (data.status === 'success') {
+            say('done', `${MSG.done} Check your inbox: you may need to tap confirm.`);
+            form.reset();
+          } else if (data.status === 'quarantined' && data.url) {
+            // Kit wants a quick "are you human" check before it adds the email
+            say('error', MSG.human);
+            const a = Object.assign(document.createElement('a'), {
+              href: data.url,
+              target: '_blank',
+              rel: 'noopener',
+              textContent: 'confirm you\u2019re not a robot',
+            });
+            msg.append(a, ', then you\u2019re on the list.');
+          } else if (Array.isArray(data.errors?.fields) && data.errors.fields.includes('email_address')) {
+            say('error', MSG.invalid);
+            input.setAttribute('aria-invalid', 'true');
+            input.focus();
+          } else {
+            throw new Error(data.status || String(res.status));
+          }
+          return;
+        }
         // Buttondown's embed URL doesn't answer cross-site requests, so its
         // reply can't be read; a sent request is treated as success.
         const opaque = endpoint.includes('buttondown');
