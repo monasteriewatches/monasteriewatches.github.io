@@ -134,3 +134,42 @@
   --logo-main: var(--color-plum);
   --logo-star: var(--color-plum);
 }
+
+/* ---- Trackside Series ------------------------------------------------------
+   The series' own palette and type (Brand Kit, Trackside chapter). Used only
+   on Trackside pages: put data-ground="tarmac" on the page's main element.
+   Core three never change; the supporting five are for screens and print.
+   No red anywhere in Trackside. White (lume) is never used for text.       */
+:root {
+  --ts-tarmac: #2e3135;     /* core: the ground                          */
+  --ts-signal: #f2c230;     /* core: headlines, buttons, highlights      */
+  --ts-lume: #ffffff;       /* core: lume only, never text               */
+  --ts-pit-wall: #1b1d20;   /* deepest ground                            */
+  --ts-sidepod: #43484e;    /* raised surfaces, borders; never text      */
+  --ts-telemetry: #b4b9bf;  /* reading text on dark (6.6:1 on tarmac)    */
+  --ts-paddock: #ecedee;    /* light ground, tarmac text only            */
+  --ts-green-flag: #3fb37f; /* status only                               */
+
+  --ts-font-display: 'Righteous', system-ui, sans-serif; /* capitals only */
+  --ts-font-text: 'Saira Variable', 'Saira', system-ui, sans-serif;
+  --ts-display-stroke: 0.04em; /* sets Righteous at the logos' weight    */
+  --ts-code-tracking: 0.18em;
+}
+
+[data-ground='tarmac'] {
+  --bg: var(--ts-tarmac);
+  --text: var(--ts-telemetry);
+  --text-muted: var(--ts-telemetry);
+  --heading: var(--ts-signal);
+  --rule: var(--ts-sidepod);
+  --focus: var(--ts-signal);
+  --btn-bg: var(--ts-signal);
+  --btn-text: var(--ts-pit-wall);
+  --font-heading: var(--ts-font-display);
+  --font-body: var(--ts-font-text);
+  --font-wordmark: var(--ts-font-display);
+  --weight-heading: 400;
+  --weight-body-strong: 600;
+  --tracking-wordmark: var(--ts-code-tracking);
+  font-family: var(--font-body);
+}
