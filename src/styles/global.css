@@ -276,3 +276,19 @@ td,
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ---- Trackside headings ----------------------------------------------------
+   Righteous, always in capitals. The two biggest sizes get a stroke in their
+   own colour so they match the weight of the lettering in the logos.       */
+[data-ground='tarmac'] :is(h1, h2, h3, h4, .h1, .h2, .h3, .h4) {
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+[data-ground='tarmac'] :is(h1, h2, .h1, .h2) {
+  -webkit-text-stroke: var(--ts-display-stroke) currentColor;
+  paint-order: stroke fill;
+}
+[data-ground='tarmac'] ::selection {
+  background: var(--ts-signal);
+  color: var(--ts-pit-wall);
+}

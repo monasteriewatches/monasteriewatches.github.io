@@ -3,6 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import TopBar from '../components/TopBar.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import Waitlist from '../components/Waitlist.astro';
+// Trackside type (Brand Kit): Righteous for headlines, Saira for text
+import '@fontsource/righteous/latin-400.css';
+import '@fontsource-variable/saira/wght.css';
 import { STATUS } from '../data/links';
 import tracks from '../data/tracks.json';
 
@@ -15,32 +18,25 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   description="Spin the globe and explore the thirty circuits of Lights Out, from Sakhir to Hockenheim, with lap length, laps and history for each."
 >
   <TopBar />
-  <main id="main">
+  <main id="main" data-ground="tarmac" class="tsp">
   <section class="ts" aria-labelledby="ts-intro-title">
     <h1 class="visually-hidden">Trackside Series: Lights Out and its 30 circuits</h1>
 
-    <!-- On tablets and phones this wrapper steps aside (display: contents) so
-         the title and controls sit above the globe and the story below it. -->
+    <!-- Desktop: a column left of the globe. Tablets and phones: above it. -->
     <div class="ts-intro">
       <div class="ts-intro-head">
         <img
           class="ts-intro-logo"
-          src={`${base}/trackside/lights-out-logo.svg`}
-          alt="Lights Out logo"
+          src={`${base}/trackside/lights-out-seal-icon.svg`}
+          alt="Lights Out seal"
           width="512"
           height="512"
         />
         <div>
-          <p class="ts-intro-eyebrow">Trackside Series · Model 01</p>
+          <p class="ts-label">Trackside Series · Model 01</p>
           <h2 id="ts-intro-title">Lights Out</h2>
         </div>
       </div>
-      <div class="ts-copy">
-      <p>Five red lights. Then nothing. Lights Out is the first watch in the Monasterie Trackside Series, built to rethink what a motorsport watch can be.</p>
-      <p>Not a logo stamped on a chronograph. A watch for the fans who plan weekends around qualifying, set alarms for races on the far side of the world, and know every corner by name.</p>
-      <p>Built around a second time zone, so the race on the other side of the world is one glance away.</p>
-      </div>
-      <div class="ts-cta">
       <p class="ts-intro-prompt">Spin the globe. Find your circuit.</p>
       <p class="ts-hint" id="ts-keys">
         Drag to turn it, or Tab to it and use the arrow keys. Enter opens a circuit.
@@ -51,11 +47,10 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
         </button>
         <button type="button" class="btn btn-text btn-sm" id="ts-spin" hidden>Pause rotation</button>
       </div>
-      <p class="ts-intro-soon">{STATUS}</p>
+      <p class="ts-label ts-intro-soon">{STATUS}</p>
       <div class="ts-next">
         <a class="btn btn-primary btn-sm" href="#reveal">Get the reveal email</a>
         <a class="btn btn-text btn-sm" href="#details">See the details</a>
-      </div>
       </div>
     </div>
 
@@ -127,6 +122,23 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     </aside>
 
     <p class="ts-foot">Lights Out, Trackside Series by Monasterie. Not affiliated with Formula 1. Circuit outlines from <a href="https://github.com/bacinger/f1-circuits">f1-circuits</a> by Tomislav Bacinger (MIT).</p>
+  </section>
+
+  <section class="tx" id="story" aria-labelledby="tx-title">
+    <div class="wrap tx-inner">
+      <!-- The page's one motif: five start lights. They light one by one, then
+           go out together when the section comes into view (still under
+           reduced motion). Signal yellow, never red. -->
+      <div class="tx-lights" id="tx-lights" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <h2 id="tx-title">Five red lights. Then away we go.</h2>
+      <div class="tx-copy">
+        <p class="tx-lead">Lights Out is the first watch in the Monasterie Trackside Series, built to rethink what a motorsport watch can be.</p>
+        <p>Not a logo stamped on a chronograph. A watch for the fans who plan weekends around qualifying, set alarms for races on the far side of the world, and know every corner by name.</p>
+        <p>Built around a second time zone, so the race on the other side of the world is one glance away.</p>
+      </div>
+    </div>
   </section>
 
   <section class="td" id="details" aria-labelledby="td-title">
@@ -288,7 +300,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     $('ts-name').focus({ preventScroll: true });
   }
 
-  // Inline the outline SVG so it takes the popcorn colour, then mark start/finish
+  // Inline the outline SVG so it takes the signal yellow, then mark start/finish
   // at the first point of its path.
   const outlineCache = new Map<string, string>();
   async function showOutline(t: Track) {
@@ -460,8 +472,8 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
       return fallback();
     }
     const token = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    // popcorn as "r,g,b" for the ring fade (three.js reads rgba, not color-mix)
-    const popcorn = (token('--color-popcorn').match(/[0-9a-f]{2}/gi) ?? ['ff', 'ff', 'ff'])
+    // signal yellow as "r,g,b" for the ring fade (three.js reads rgba, not color-mix)
+    const popcorn = (token('--ts-signal').match(/[0-9a-f]{2}/gi) ?? ['ff', 'ff', 'ff'])
       .slice(0, 3)
       .map((h) => parseInt(h, 16))
       .join(',');
@@ -475,7 +487,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
         .backgroundColor('rgba(0,0,0,0)')
         .globeImageUrl(`${base}/earth-night.jpg`)
         .showAtmosphere(true)
-        .atmosphereColor(token('--color-cerulean'))
+        .atmosphereColor(token('--ts-telemetry'))
         .atmosphereAltitude(0.2)
         .htmlElementsData(ordered)
         .htmlLat('lat')
@@ -567,6 +579,20 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     if (!e.isIntersecting && !panel.hidden) close();
   }).observe(document.querySelector('.ts')!);
 
+  // The start lights: light one by one, then all out, once, when the story
+  // section comes into view.
+  const lights = document.getElementById('tx-lights');
+  if (lights && !reduced && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      lights.classList.add('is-running');
+      io.disconnect();
+    }, { threshold: 0.6 });
+    io.observe(lights);
+  } else {
+    lights?.classList.add('is-lit');
+  }
+
   // A shared link (/trackside/#SIL) opens straight to that circuit.
   const linked = byCode.get(location.hash.slice(1).toUpperCase());
   if (linked) {
@@ -576,19 +602,25 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
 </script>
 
 <style>
-  .ts {
-    /* the intro lines up with the top bar's content edge */
-    --ts-left: max(var(--grid-margin), (100% - var(--grid-max)) / 2);
-    --ts-w: min(28rem, 36vw);
-    position: relative;
-    height: calc(100svh - var(--bar-h));
-    overflow: hidden;
-    background: radial-gradient(
-      ellipse at 60% 45%,
-      color-mix(in srgb, var(--color-plum) 88%, var(--color-parchment)) 0%,
-      var(--color-plum) 45%,
-      color-mix(in srgb, var(--color-plum) 55%, var(--color-ink)) 100%
-    );
+  /* ==========================================================================
+     Trackside page. Everything reads the tarmac ground (tokens.css): Signal
+     Yellow for headlines, buttons and highlights, Telemetry for reading text,
+     Sidepod for rules and raised surfaces, Pit Wall for the deepest grounds.
+     One section rhythm: each section opens with a label or h2 on the same
+     .wrap edge, 96px above and below, a Sidepod rule between sections.
+     ========================================================================== */
+  .tsp {
+    --ts-rule: var(--border-width) solid var(--ts-sidepod);
+  }
+  .tsp :global(.ts-label),
+  .ts-label {
+    margin: 0;
+    font-family: var(--ts-font-text);
+    font-weight: 600;
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ts-telemetry);
   }
   .visually-hidden {
     position: absolute;
@@ -597,6 +629,22 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+
+  /* ---- Hero: the globe ----------------------------------------------------- */
+  .ts {
+    /* the intro lines up with the .wrap edge used by every section below */
+    --ts-left: max(var(--grid-margin), (100% - var(--grid-max)) / 2);
+    --ts-w: min(26rem, 34vw);
+    position: relative;
+    height: calc(100svh - var(--bar-h));
+    overflow: hidden;
+    background: radial-gradient(
+      ellipse at 62% 45%,
+      var(--ts-tarmac) 0%,
+      color-mix(in srgb, var(--ts-tarmac) 70%, var(--ts-pit-wall)) 50%,
+      var(--ts-pit-wall) 100%
+    );
   }
   .ts-stage,
   .ts-globe {
@@ -620,7 +668,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   /* Before the live globe loads, focus on the group shows on the still */
   .ts-globe:focus-visible {
     opacity: 1;
-    outline: var(--focus-width) solid var(--color-parchment);
+    outline: var(--focus-width) solid var(--focus);
     outline-offset: calc(-1 * var(--space-4));
   }
   /* The still: one square image as tall as the stage, centred. The live
@@ -643,6 +691,80 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   }
   .ts-stage.is-live .ts-poster {
     opacity: 0;
+  }
+
+  /* ---- Intro column ----------------------------------------------------------- */
+  .ts-intro {
+    position: absolute;
+    z-index: 1;
+    left: var(--ts-left);
+    top: 50%;
+    translate: 0 -50%;
+    width: var(--ts-w);
+    max-height: calc(100% - 2 * var(--space-6));
+    overflow-y: auto;
+    animation: ts-intro-in 600ms var(--ease-out) both;
+  }
+  @keyframes ts-intro-in {
+    from {
+      opacity: 0;
+      translate: 0 calc(-50% + 0.75rem);
+    }
+  }
+  .ts-intro-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    align-items: center;
+    margin-bottom: var(--space-6);
+  }
+  .ts-intro-logo {
+    width: clamp(5rem, 3.5rem + 4vw, 7rem);
+    height: auto;
+    aspect-ratio: 1;
+  }
+  .ts-intro-head .ts-label {
+    margin-bottom: var(--space-2);
+  }
+  .ts-intro h2 {
+    margin: 0;
+    font-size: clamp(2.75rem, 2.2rem + 1.8vw, 3.75rem);
+    line-height: 0.95;
+  }
+  .ts-intro p {
+    max-width: 34ch;
+  }
+  .ts-intro-prompt {
+    margin: 0 0 var(--space-1);
+    font-family: var(--ts-font-display);
+    font-size: var(--text-h4);
+    line-height: var(--leading-h4);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--ts-signal);
+  }
+  .ts-hint {
+    margin: 0;
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+  }
+  .ts-controls,
+  .ts-next {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+  }
+  .ts-controls {
+    margin: var(--space-4) 0 var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: var(--ts-rule);
+  }
+  .ts-controls [hidden] {
+    display: none;
+  }
+  .ts-next {
+    margin-top: var(--space-3);
   }
 
   /* ---- Dots (built in the script, so styled globally) ---------------------- */
@@ -668,14 +790,17 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    background: var(--color-popcorn);
+    background: var(--ts-signal);
     box-shadow:
-      0 0 6px 2px color-mix(in srgb, var(--color-popcorn) 75%, transparent),
-      0 0 16px 4px color-mix(in srgb, var(--color-popcorn) 35%, transparent);
+      0 0 6px 2px color-mix(in srgb, var(--ts-signal) 70%, transparent),
+      0 0 16px 4px color-mix(in srgb, var(--ts-signal) 30%, transparent);
     transition: transform var(--dur-base) var(--ease-out);
   }
   :global(.ts-dot:focus-visible) {
     opacity: 1;
+    outline: var(--focus-width) solid var(--ts-signal);
+    outline-offset: 0;
+    border-radius: 50%;
   }
   :global(.ts-dot:focus-visible .ts-dot-core) {
     transform: scale(1.4);
@@ -699,14 +824,9 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     50% {
       transform: scale(1.8);
       box-shadow:
-        0 0 10px 4px color-mix(in srgb, var(--color-popcorn) 90%, transparent),
-        0 0 28px 8px color-mix(in srgb, var(--color-popcorn) 45%, transparent);
+        0 0 10px 4px color-mix(in srgb, var(--ts-signal) 85%, transparent),
+        0 0 28px 8px color-mix(in srgb, var(--ts-signal) 40%, transparent);
     }
-  }
-  :global(.ts-dot:focus-visible) {
-    outline: var(--focus-width) solid var(--color-parchment);
-    outline-offset: 0;
-    border-radius: 50%;
   }
   :global(.ts-dot-label) {
     position: absolute;
@@ -715,11 +835,14 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     translate: -50% 0;
     padding: var(--space-1) var(--space-2);
     border-radius: var(--radius);
-    background: var(--color-ink);
-    color: var(--color-parchment);
-    font-family: var(--font-heading);
-    font-weight: var(--weight-heading);
-    font-size: var(--text-small);
+    background: var(--ts-pit-wall);
+    border: var(--border-width) solid var(--ts-sidepod);
+    color: var(--ts-signal);
+    font-family: var(--ts-font-text);
+    font-weight: 600;
+    font-size: var(--text-label);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
@@ -730,7 +853,7 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     opacity: 1;
   }
 
-  /* ---- Side panel / bottom sheet ------------------------------------------ */
+  /* ---- Circuit panel / bottom sheet ------------------------------------------ */
   .ts-panel {
     position: fixed;
     top: calc(var(--bar-h) + var(--space-4));
@@ -739,8 +862,8 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     width: min(26rem, calc(100% - 2 * var(--space-4)));
     overflow-y: auto;
     padding: var(--space-6) var(--space-5) var(--space-5);
-    background: color-mix(in srgb, var(--color-ink) 92%, transparent);
-    border: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 35%, transparent);
+    background: color-mix(in srgb, var(--ts-pit-wall) 94%, transparent);
+    border: var(--ts-rule);
     border-radius: var(--radius);
     backdrop-filter: blur(6px);
     animation: ts-in 220ms var(--ease-out) both;
@@ -768,19 +891,28 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     font-size: 1.75rem;
     line-height: 1;
     cursor: pointer;
-  }
-  .ts-close {
     transition:
       background-color var(--dur-fast) ease,
       transform var(--dur-fast) var(--ease-out);
   }
   @media (hover: hover) and (pointer: fine) {
     .ts-close:hover {
-      background: color-mix(in srgb, var(--color-parchment) 10%, transparent);
+      background: var(--ts-sidepod);
     }
   }
   .ts-close:active {
     transform: scale(0.94);
+  }
+  .ts-close:focus-visible {
+    outline: var(--focus-width) solid var(--focus);
+  }
+  .ts-panel h2 {
+    /* long names (Spa-Francorchamps) must fit the 26rem panel */
+    font-size: var(--text-h3);
+    line-height: var(--leading-h3);
+    margin: 0;
+    padding-right: var(--space-6); /* clear of the close button */
+    overflow-wrap: anywhere;
   }
   .ts-panel h2:focus {
     outline: none;
@@ -789,33 +921,29 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     outline: var(--focus-width) solid var(--focus);
     outline-offset: var(--space-1);
   }
-  .ts-close:focus-visible {
-    outline: var(--focus-width) solid var(--focus);
-  }
   .ts-eyebrow {
     display: flex;
     gap: var(--space-3);
     align-items: baseline;
     margin: 0 0 var(--space-2);
+    font-weight: 600;
     font-size: var(--text-label);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--text-muted);
   }
-  /* popcorn is the beacon's light only, never text (tokens.css) */
+  /* track codes: Saira Bold, wide tracking, Signal Yellow (Brand Kit) */
+  #ts-code,
+  .ts-code {
+    font-family: var(--ts-font-text);
+    font-weight: 700;
+    letter-spacing: var(--ts-code-tracking);
+    color: var(--ts-signal);
+  }
   #ts-code {
-    font-family: var(--font-wordmark);
     font-size: 1.125rem;
-    letter-spacing: var(--tracking-wordmark);
-    color: var(--text);
-  }
-  .ts-panel h2 {
-    font-size: var(--text-h2);
-    margin: 0;
   }
   .ts-country {
     margin: var(--space-1) 0 var(--space-4);
-    color: var(--text-muted);
     font-size: var(--text-small);
   }
   .ts-outline {
@@ -824,13 +952,11 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     border-radius: var(--radius);
     display: grid;
     place-items: center;
-  }
-  .ts-outline {
-    color: var(--color-popcorn);
+    color: var(--ts-signal);
   }
   .ts-outline.is-empty {
-    border: var(--border-width) dashed color-mix(in srgb, var(--color-cerulean) 30%, transparent);
-    color: var(--text-muted);
+    border: var(--border-width) dashed var(--ts-sidepod);
+    color: var(--text);
     font-size: var(--text-small);
   }
   .ts-outline :global(svg) {
@@ -839,9 +965,9 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     overflow: visible;
   }
   .ts-outline :global(.ts-start) {
-    fill: var(--color-parchment);
-    stroke: var(--color-ink);
-    stroke-width: 1.5;
+    fill: var(--ts-pit-wall);
+    stroke: var(--ts-signal);
+    stroke-width: 2;
   }
   .ts-stats {
     display: grid;
@@ -852,21 +978,23 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   .ts-stats div {
     padding: var(--space-3);
     border-radius: var(--radius);
-    background: color-mix(in srgb, var(--color-plum) 70%, transparent);
+    background: var(--ts-tarmac);
+    border: var(--ts-rule);
   }
   .ts-stats dt {
+    font-weight: 600;
     font-size: var(--text-label);
     letter-spacing: var(--tracking-label);
     text-transform: uppercase;
-    color: var(--text-muted);
   }
   .ts-stats dd {
     margin: var(--space-1) 0 0;
-    font-family: var(--font-heading);
-    font-weight: var(--weight-heading);
+    font-family: var(--ts-font-display);
     font-size: var(--text-h4);
+    color: var(--ts-signal);
   }
-  .ts-history {
+  .ts-history,
+  .ts-facts {
     font-size: var(--text-small);
     line-height: var(--leading-small);
   }
@@ -877,22 +1005,40 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   .ts-facts {
     margin: 0;
     padding-left: 1.1em;
-    font-size: var(--text-small);
-    line-height: var(--leading-small);
   }
   .ts-facts :global(li + li) {
     margin-top: var(--space-2);
   }
+  .ts-facts :global(li::marker) {
+    color: var(--ts-signal);
+  }
   .ts-disc {
     margin: var(--space-5) 0 0;
     padding-top: var(--space-4);
-    border-top: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 35%, transparent);
-    font-family: var(--font-heading);
-    font-style: italic;
-    font-size: var(--text-h4);
+    border-top: var(--ts-rule);
+    font-weight: 600;
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+  .ts-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: var(--ts-rule);
+  }
+  .ts-share-msg {
+    margin: var(--space-2) 0 0;
+    min-height: 1.5em;
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    overflow-wrap: anywhere;
   }
 
-  /* ---- Fallback list ------------------------------------------------------- */
+  /* ---- The 30 as a list (also the no-WebGL fallback) ------------------------ */
   .ts-list {
     height: 100%;
     overflow-y: auto;
@@ -925,17 +1071,15 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     font-size: var(--text-small);
     text-align: left;
     cursor: pointer;
-  }
-  .ts-list-item {
     transition: background-color var(--dur-fast) ease;
   }
   @media (hover: hover) and (pointer: fine) {
     .ts-list-item:hover {
-      background: color-mix(in srgb, var(--color-parchment) 8%, transparent);
+      background: var(--ts-sidepod);
     }
   }
   .ts-list-item:active {
-    background: color-mix(in srgb, var(--color-parchment) 14%, transparent);
+    background: var(--ts-sidepod);
   }
   .ts-list[hidden] {
     display: none;
@@ -945,187 +1089,20 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   }
   .ts-pos {
     width: 1.5rem;
-    color: var(--text-muted);
-  }
-  .ts-code {
-    font-family: var(--font-wordmark);
-    letter-spacing: var(--tracking-wordmark);
-    color: var(--text);
   }
 
-  /* ---- Intro panel ----------------------------------------------------- */
-  .ts-intro {
-    position: absolute;
-    z-index: 1;
-    left: var(--ts-left);
-    top: 50%;
-    translate: 0 -50%;
-    width: var(--ts-w);
-    max-height: calc(100% - 2 * var(--space-6));
-    overflow-y: auto;
-    animation: ts-intro-in 600ms var(--ease-out) both;
-  }
-  @keyframes ts-intro-in {
-    from {
-      opacity: 0;
-      translate: 0 calc(-50% + 0.75rem);
-    }
-  }
-  .ts-intro .ts-intro-eyebrow {
-    max-width: none;
-    margin: 0 0 var(--space-3);
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  .ts-intro-head {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--space-4);
-    align-items: center;
-    margin-bottom: var(--space-5);
-  }
-  .ts-intro-logo {
-    width: clamp(4.5rem, 3rem + 4vw, 6.5rem);
-    height: auto;
-    aspect-ratio: 1;
-    border-radius: var(--radius);
-  }
-  .ts-intro-head h2 {
-    margin: 0;
-  }
-  .ts-intro h2 {
-    font-family: var(--font-heading);
-    font-size: clamp(3rem, 2.4rem + 1.8vw, 4rem);
-    line-height: 0.95;
-    white-space: nowrap;
-  }
-  .ts-intro p {
-    font-size: var(--text-small);
-    line-height: var(--leading-small);
-    max-width: 34ch;
-  }
-  .ts-intro .ts-intro-prompt {
-    margin: var(--space-5) 0 var(--space-1);
-    font-family: var(--font-heading);
-    font-weight: var(--weight-heading);
-    font-size: var(--text-h4);
-    color: var(--heading);
-  }
-  .ts-intro .ts-hint {
-    margin: 0;
-    color: var(--text-muted);
-  }
-  .ts-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-4);
-    margin: var(--space-4) 0;
-  }
-  .ts-controls [hidden] {
-    display: none;
-  }
-  .ts-intro .ts-intro-soon {
-    margin: var(--space-1) 0 0;
-    font-size: var(--text-label);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  @media (min-width: 1024px) {
-    /* the globe takes the space right of the intro */
-    .ts-stage,
-    .ts-list {
-      margin-left: 0;
-      left: calc(var(--ts-left) + var(--ts-w));
-    }
-    .ts-foot {
-      left: calc(var(--ts-left) + var(--ts-w));
-    }
-    /* the open panel needs the room; the credit comes back when it closes */
-    :global(body.ts-open) .ts-foot {
-      visibility: hidden;
-    }
-    .ts-list {
-      position: absolute;
-      inset-block: 0;
-      right: 0;
-    }
-  }
-  /* Tablets and phones: intro on top, globe below */
-  @media (max-width: 1023px) {
-    .ts {
-      height: auto;
-      overflow: visible;
-      display: flex;
-      flex-direction: column;
-    }
-    .ts-intro {
-      display: contents;
-    }
-    .ts-intro-head,
-    .ts-cta,
-    .ts-copy {
-      padding-inline: var(--grid-margin);
-    }
-    .ts-intro-head {
-      order: 1;
-      padding-top: var(--space-6);
-      animation: fade-up 600ms var(--ease-out) both;
-    }
-    .ts-cta {
-      order: 2;
-      padding-bottom: var(--space-4);
-    }
-    .ts-stage {
-      order: 3;
-    }
-    .ts-list {
-      order: 4;
-    }
-    .ts-copy {
-      order: 5;
-      padding-block: var(--space-6) var(--space-2);
-    }
-    .ts-foot {
-      order: 6;
-    }
-    @keyframes fade-up {
-      from {
-        opacity: 0;
-        transform: translateY(0.75rem);
-      }
-    }
-    .ts-intro p {
-      max-width: 40rem;
-    }
-    .ts-cta .ts-intro-prompt {
-      margin-top: 0;
-    }
-    .ts-stage {
-      position: relative;
-      inset: auto;
-      height: min(75svh, 100vw);
-      scroll-margin-top: var(--bar-h);
-    }
-    .ts-foot {
-      position: static;
-      padding-block: var(--space-4) var(--space-5);
-    }
-  }
-
-  .ts-foot {
+  /* ---- Credit line ---------------------------------------------------------- */
+  p.ts-foot {
     position: absolute;
     left: 0;
     right: 0;
     bottom: var(--space-3);
+    margin: 0;
+    max-width: none;
+    padding-inline: var(--grid-margin);
     text-align: center;
     font-size: var(--text-label);
-    color: var(--text-muted);
     pointer-events: none;
-    padding-inline: var(--grid-margin);
   }
   .ts-foot a {
     display: inline-block;
@@ -1134,7 +1111,68 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     pointer-events: auto;
   }
 
-  /* ---- Phones: bottom sheet --------------------------------------------- */
+  /* ---- Desktop: intro column left, globe right ------------------------------ */
+  @media (min-width: 1024px) {
+    .ts-stage,
+    .ts-list,
+    p.ts-foot {
+      left: calc(var(--ts-left) + var(--ts-w));
+    }
+    .ts-list {
+      position: absolute;
+      inset-block: 0;
+      right: 0;
+      margin: 0;
+    }
+    /* the open panel needs the room; the credit comes back when it closes */
+    :global(body.ts-open) .ts-foot {
+      visibility: hidden;
+    }
+  }
+
+  /* ---- Tablets and phones: intro on top, globe below -------------------------- */
+  @media (max-width: 1023px) {
+    .ts {
+      height: auto;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+    }
+    .ts-intro {
+      position: static;
+      translate: none;
+      width: auto;
+      max-height: none;
+      overflow: visible;
+      padding: var(--space-7) var(--grid-margin) var(--space-4);
+      animation-name: ts-fade-up;
+    }
+    @keyframes ts-fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(0.75rem);
+      }
+    }
+    .ts-intro p {
+      max-width: 40rem;
+    }
+    .ts-controls {
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-5);
+    }
+    .ts-stage {
+      position: relative;
+      inset: auto;
+      height: min(75svh, 100vw);
+      scroll-margin-top: var(--bar-h);
+    }
+    p.ts-foot {
+      position: static;
+      padding-block: var(--space-4) var(--space-5);
+    }
+  }
+
+  /* ---- Phones: the panel becomes a bottom sheet -------------------------------- */
   @media (max-width: 767px) {
     .ts-panel {
       top: auto;
@@ -1166,112 +1204,126 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .ts-intro,
-    .ts-intro-head {
-      animation: none;
-    }
-    .ts-panel {
-      animation: none;
-    }
-    :global(.ts-dot.is-active .ts-dot-core) {
-      animation: none;
-      transform: scale(1.6);
-    }
-    .ts-globe,
-    .ts-poster {
-      transition: none;
-    }
-  }
-  /* ---- Intro: next steps ---------------------------------------------------- */
-  .ts-next {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-4);
-    margin-top: var(--space-4);
-  }
-  p.ts-foot {
-    margin: 0;
-    max-width: none;
-  }
-  @media (max-width: 1023px) {
-    p.ts-foot {
-      position: static;
-    }
-  }
-
-  /* ---- Panel: the circuit leads somewhere ------------------------------------ */
-  .ts-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-4);
-    margin-top: var(--space-5);
-    padding-top: var(--space-5);
-    border-top: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 30%, transparent);
-  }
-  .ts-share-msg {
-    margin: var(--space-2) 0 0;
-    min-height: 1.5em;
-    font-size: var(--text-small);
-    line-height: var(--leading-small);
-    color: var(--text-muted);
-    overflow-wrap: anywhere;
-  }
-
-  /* ---- Details ------------------------------------------------------------ */
+  /* ---- Sections below the globe: one rhythm ----------------------------------- */
+  .tx,
   .td,
   .tr {
-    border-top: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 30%, transparent);
-  }
-  .td {
     padding-block: var(--space-9);
+    border-top: var(--ts-rule);
+  }
+  .tx h2,
+  .td-head h2,
+  .tr h2 {
+    margin: 0 0 var(--space-4);
+  }
+
+  /* ---- Story: what's coming ------------------------------------------------------ */
+  .tx {
+    background: var(--ts-tarmac);
+  }
+  .tx-inner {
+    display: grid;
+    gap: var(--space-6) var(--space-8);
+  }
+  .tx-copy p {
+    max-width: 38rem;
+  }
+  .tx-copy p:last-child {
+    margin-bottom: 0;
+  }
+  .tx-lead {
+    font-size: var(--text-h4);
+    line-height: var(--leading-h4);
+    font-weight: 500;
+  }
+  .tx-lights {
+    display: flex;
+    gap: clamp(0.75rem, 2vw, 1.25rem);
+  }
+  .tx-lights i {
+    display: block;
+    width: clamp(2rem, 1.5rem + 2vw, 3rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--ts-sidepod);
+    box-shadow: 0 0 0 0.375rem var(--ts-pit-wall);
+  }
+  .tx-lights.is-lit i {
+    background: var(--ts-signal);
+  }
+  .tx-lights.is-running i {
+    animation:
+      tx-on 1ms calc(var(--k) * 600ms) forwards,
+      tx-off 1ms 3600ms forwards;
+  }
+  .tx-lights i:nth-child(1) { --k: 1; }
+  .tx-lights i:nth-child(2) { --k: 2; }
+  .tx-lights i:nth-child(3) { --k: 3; }
+  .tx-lights i:nth-child(4) { --k: 4; }
+  .tx-lights i:nth-child(5) { --k: 5; }
+  @keyframes tx-on {
+    to {
+      background: var(--ts-signal);
+      box-shadow:
+        0 0 0 0.375rem var(--ts-pit-wall),
+        0 0 1.5rem 0.25rem color-mix(in srgb, var(--ts-signal) 45%, transparent);
+    }
+  }
+  @keyframes tx-off {
+    to {
+      background: var(--ts-sidepod);
+      box-shadow: 0 0 0 0.375rem var(--ts-pit-wall);
+    }
+  }
+
+  /* ---- Details -------------------------------------------------------------- */
+  .td {
+    background: var(--ts-tarmac);
   }
   .td-head {
     max-width: 40rem;
     margin-bottom: var(--space-7);
   }
-  .td-head h2,
-  .tr h2 {
-    margin: 0 0 var(--space-3);
-    text-wrap: balance;
-  }
   .td-lead,
   .tr-lead {
     margin: 0;
-    color: var(--text-muted);
   }
   .td-highlights {
     list-style: none;
     margin: 0 0 var(--space-8);
-    padding: 0;
+    padding: var(--space-6) 0;
+    border-block: var(--ts-rule);
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-6) var(--space-5);
   }
   .td-highlights li {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--space-2);
     align-content: start;
   }
   .td-hl-num {
-    font-family: var(--font-heading);
-    font-weight: var(--weight-heading);
+    font-family: var(--ts-font-display);
     font-size: var(--text-h2);
     line-height: 1;
-    color: var(--heading);
+    text-transform: uppercase;
+    color: var(--ts-signal);
+    -webkit-text-stroke: var(--ts-display-stroke) currentColor;
+    paint-order: stroke fill;
   }
   .td-hl-label {
     font-size: var(--text-small);
     line-height: var(--leading-small);
-    color: var(--text-muted);
     max-width: 14rem;
   }
   .td-chapters {
     display: grid;
     gap: var(--space-7);
     margin-bottom: var(--space-8);
+  }
+  .td-chapter {
+    padding-top: var(--space-4);
+    border-top: 2px solid var(--ts-signal);
   }
   .td-chapter h3,
   .td-specs-title,
@@ -1291,18 +1343,21 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
   .td-specs {
     margin: 0;
     display: grid;
-    border-top: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 30%, transparent);
+    border-top: var(--ts-rule);
   }
   .td-specs div {
     display: grid;
     grid-template-columns: minmax(8rem, 1fr) 2fr;
     gap: var(--space-4);
     padding-block: var(--space-3);
-    border-bottom: var(--border-width) solid color-mix(in srgb, var(--color-cerulean) 30%, transparent);
+    border-bottom: var(--ts-rule);
   }
   .td-specs dt {
-    color: var(--text-muted);
-    font-size: var(--text-small);
+    font-weight: 600;
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    align-self: center;
   }
   .td-specs dd {
     margin: 0;
@@ -1312,6 +1367,10 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     display: grid;
     gap: var(--space-6);
     align-items: center;
+    padding: var(--space-6);
+    background: var(--ts-pit-wall);
+    border: var(--ts-rule);
+    border-radius: var(--radius);
   }
   .td-fit-fig {
     margin: 0;
@@ -1325,40 +1384,38 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     overflow: visible;
   }
   .td-strap {
-    fill: color-mix(in srgb, var(--color-parchment) 8%, transparent);
+    fill: var(--ts-sidepod);
   }
   .td-lugs,
   .td-case,
   .td-dial {
     fill: none;
-    stroke: var(--color-parchment);
+    stroke: var(--ts-telemetry);
     stroke-width: 0.35;
   }
   .td-case {
-    fill: var(--color-plum);
+    fill: var(--ts-tarmac);
   }
   .td-dial {
-    stroke: var(--color-cerulean);
+    stroke: var(--ts-signal);
     stroke-dasharray: 1 1;
   }
   .td-dim {
-    stroke: var(--color-cerulean);
+    stroke: var(--ts-signal);
     stroke-width: 0.25;
   }
   .td-fit-fig figcaption {
     margin-top: var(--space-3);
     text-align: center;
     font-size: var(--text-small);
-    color: var(--text-muted);
   }
   .td-fit-text p {
     max-width: 30rem;
   }
 
-  /* ---- Reveal list -------------------------------------------------------- */
+  /* ---- Reveal list ------------------------------------------------------------ */
   .tr {
-    padding-block: var(--space-9);
-    background: color-mix(in srgb, var(--color-plum) 70%, var(--color-ink));
+    background: var(--ts-pit-wall);
   }
   .tr-inner {
     display: grid;
@@ -1384,13 +1441,43 @@ const sorted = [...tracks].sort((a, b) => a.position - b.position);
     .td-fit {
       grid-template-columns: 15rem 1fr;
       gap: var(--space-8);
+      padding: var(--space-7);
     }
   }
   @media (min-width: 1024px) {
+    .tx-inner {
+      grid-template-columns: 5fr 7fr;
+      align-items: start;
+    }
+    .tx-lights {
+      grid-column: 1 / -1;
+    }
+    .tx h2 {
+      font-size: var(--text-h1);
+      line-height: var(--leading-h1);
+    }
     .td-specs-wrap {
       display: grid;
       grid-template-columns: 1fr 2fr;
       gap: var(--space-6);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ts-intro,
+    .ts-panel {
+      animation: none;
+    }
+    :global(.ts-dot.is-active .ts-dot-core) {
+      animation: none;
+      transform: scale(1.6);
+    }
+    .ts-globe,
+    .ts-poster {
+      transition: none;
+    }
+    .tx-lights.is-running i {
+      animation: none;
     }
   }
 </style>
